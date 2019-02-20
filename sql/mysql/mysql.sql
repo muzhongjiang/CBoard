@@ -1,7 +1,22 @@
+
+--创建用cboard元数据库：
+
 DROP DATABASE IF EXISTS cboard;
 CREATE DATABASE cboard CHARACTER SET utf8;
-USE cboard;
 
+
+
+--创建用cboard户：
+create user 'cboard'@'%' identified by 'cboard';
+grant  all  on  cboard.*  to  'cboard'@'%'  identified  by  'cboard';    --外网慎重
+grant  all  on  cboard.*  to  'cboard'@'localhost'  identified  by  'cboard';
+grant  all  on  cboard.*  to  'cboard'@'tencent32'  identified  by  'cboard';
+FLUSH  PRIVILEGES;        --刷新
+
+
+----------
+USE cboard;
+--
 CREATE TABLE dashboard_board (
   board_id bigint(20) NOT NULL AUTO_INCREMENT,
   user_id varchar(50) NOT NULL,
