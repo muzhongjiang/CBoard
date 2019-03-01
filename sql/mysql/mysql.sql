@@ -6,11 +6,11 @@ CREATE DATABASE cboard CHARACTER SET utf8;
 
 
 
-##创建用cboard户：
+##创建用cboard户:
 create user 'cboard'@'%' identified by 'cboard';
 grant  all  on  cboard.*  to  'cboard'@'%'  identified  by  'cboard';    ##外网慎重
 grant  all  on  cboard.*  to  'cboard'@'localhost'  identified  by  'cboard';
-grant  all  on  cboard.*  to  'cboard'@'tencent32'  identified  by  'cboard';
+ #-- grant  all  on  cboard.*  to  'cboard'@'主机名'  identified  by  'cboard';
 FLUSH  PRIVILEGES;        ##刷新
 
 
