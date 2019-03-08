@@ -24,8 +24,8 @@ CREATE TABLE  dashboard_board (
   category_id bigint(20) DEFAULT NULL,
   board_name varchar(100) NOT NULL,
   layout_json text,
-  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON  UPDATE  CURRENT_TIMESTAMP,
   PRIMARY KEY (board_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -44,8 +44,8 @@ CREATE TABLE dashboard_datasource (
   source_name varchar(100) NOT NULL,
   source_type varchar(100) NOT NULL,
   config text,
-  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ON  UPDATE  CURRENT_TIMESTAMP,
   PRIMARY KEY (datasource_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -56,8 +56,8 @@ CREATE TABLE dashboard_widget (
   category_name varchar(100) DEFAULT NULL,
   widget_name varchar(100) DEFAULT NULL,
   data_json text,
-  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ON  UPDATE  CURRENT_TIMESTAMP,
   PRIMARY KEY (widget_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -68,8 +68,8 @@ CREATE TABLE dashboard_dataset (
   category_name varchar(100) DEFAULT NULL,
   dataset_name varchar(100) DEFAULT NULL,
   data_json text,
-  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ON  UPDATE  CURRENT_TIMESTAMP,
   PRIMARY KEY (dataset_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
