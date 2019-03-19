@@ -183,7 +183,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         }
         fsql = "SELECT cb_view.%s FROM (\n%s\n) cb_view %s GROUP BY cb_view.%s";
         exec = String.format(fsql, columnName, sql, whereStr, columnName);
-        LOG.info(exec);
+        LOG.info("【{}】",exec);
         try (Connection connection = getConnection();
              Statement stat = connection.createStatement();
              ResultSet rs = stat.executeQuery(exec)) {
@@ -191,7 +191,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 filtered.add(rs.getString(1));
             }
         } catch (Exception e) {
-            LOG.error("ERROR:" + e.getMessage());
+            LOG.error("ERROR:{}" , e.getMessage());
             throw new Exception("ERROR:" + e.getMessage(), e);
         }
         return filtered.toArray(new String[]{});
@@ -204,11 +204,11 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
             stat.setMaxRows(100);
             String fsql = "\nSELECT * FROM (\n%s\n) cb_view WHERE 1=0";
             String sql = String.format(fsql, subQuerySql);
-            LOG.info(sql);
+            LOG.info("【{}】",sql);
             ResultSet rs = stat.executeQuery(sql);
             metaData = rs.getMetaData();
         } catch (Exception e) {
-            LOG.error("ERROR:" + e.getMessage());
+            LOG.error("ERROR:{}" , e.getMessage());
             throw new Exception("ERROR:" + e.getMessage(), e);
         }
         return metaData;
@@ -259,7 +259,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
     public AggregateResult queryAggData(AggConfig config) throws Exception {
         String exec = sqlHelper.assembleAggDataSql(config);
         List<String[]> list = new LinkedList<>();
-        LOG.info(exec);
+        LOG.info("【{}】",exec);
         try (
                 Connection connection = getConnection();
                 Statement stat = connection.createStatement();

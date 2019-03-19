@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Created by yfyuan on 2016/12/2.
+ * 用户、角色、菜单权限
  */
 @RestController
 @RequestMapping("/admin")

@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.cboard.dao.*;
 import org.cboard.pojo.*;
 import org.cboard.services.role.RolePermission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
  */
 @Repository
 public class AdminSerivce {
+    protected Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Value("${admin_user_id:1}")
     private String adminUid;
@@ -193,8 +196,18 @@ public class AdminSerivce {
         } else {
             List<DashboardRoleRes> resList = roleDao.getUserRoleResList(userId, "board");
 
-            List<Long> resIdList = resList.stream().filter(e -> RolePermission.isEdit(e.getPermission())).map(e -> e.getResId()).distinct().collect(Collectors.toList());
-            return boardDao.getBoardList(userId).stream().filter(e -> resIdList.contains(e.getId()) || e.getUserId().equals(userId)).collect(Collectors.toList());
+            List<Long> resIdList = resList.stream().filter(
+                    e -> RolePermission.isEdit(e.getPermission())
+            ).map(
+                    e -> e.getResId()
+            ).distinct().collect(Collectors.toList());
+            List<DashboardBoard> result= boardDao.getBoardList(userId).stream()
+                    .filter( e -> resIdList.contains(e.getId())
+                            || e.getUserId().equals(userId))
+                    .collect(Collectors.toList());
+            LOG.info("getBoardList={}",result);
+            return  result;
+
         }
     }
 

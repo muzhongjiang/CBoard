@@ -291,6 +291,14 @@ public class DashboardController extends BaseController {
         return dataProviderService.getDimensionValues(datasourceId, strParams, datasetId, colmunName, config, reload);
     }
 
+    /**
+     * 配置"数据集（cube）"时获取"查询语句"返回的columns
+     *
+     * @param datasourceId 数据源Id
+     * @param query  数据集对应的sql
+     * @param datasetId
+     * @param reload 等于false时走缓存
+     */
     @RequestMapping(value = "/getColumns")
     public DataProviderResult getColumns(@RequestParam(name = "datasourceId", required = false) Long datasourceId,
                                          @RequestParam(name = "query", required = false) String query,

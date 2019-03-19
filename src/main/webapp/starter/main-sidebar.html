@@ -74,9 +74,6 @@
                 <li ui-sref-active="active" ng-if="isShowMenu('config.board')">
                     <a ui-sref="config.board"><i class="fa fa-puzzle-piece"></i>{{'SIDEBAR.DASHBOARD'|translate}}</a>
                 </li>
-                <li ui-sref-active="active" ng-if="isShowMenu('config.homepage')">
-                    <a ui-sref="config.homepage"><i class="fa fa-star"></i>{{'SIDEBAR.HOMEPAGE'|translate}}</a>
-                </li>
                 <li ui-sref-active="active" ng-if="isShowMenu('config.job')">
                     <a ui-sref="config.job"><i class="fa fa-clock-o"></i>{{'SIDEBAR.JOB'|translate}}</a>
                 </li>
@@ -97,6 +94,12 @@
             <ul class="treeview-menu">
                 <li ui-sref-active="active" ng-if="isShowMenu('admin.user')">
                     <a ui-sref="admin.user"><i class="fa fa-fw fa-user"></i>{{'SIDEBAR.USER_ADMIN'|translate}}</a>
+                </li>
+                <li ui-sref-active="active" ng-if="isShowMenu('config.homepage')">
+                    <a ui-sref="config.homepage"><i class="fa fa-star"></i>{{'SIDEBAR.HOMEPAGE'|translate}}</a>
+                </li>
+                <li>
+                    <a href="https://www.baidu.com"><i class="fa fa-star"></i>操作日志</a>
                 </li>
             </ul>
         </li>

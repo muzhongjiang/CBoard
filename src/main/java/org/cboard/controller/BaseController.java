@@ -14,11 +14,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Pattern;
 
 /**
- * Created by zyong on 2017/9/28.
+ * Controller共有功能
  */
 public class BaseController {
 
-    Logger LOG = LoggerFactory.getLogger(this.getClass());
+    protected  Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     protected AuthenticationService authenticationService;
@@ -31,14 +31,19 @@ public class BaseController {
     @Value("${log.positveFilter}")
     protected String positveFilter;
 
+
+    /**
+     * 打印操作日志（记录用户请求的url链接）
+     */
     @ModelAttribute
     public void initialAuthUser(HttpServletRequest request) {
         String url = request.getRequestURL().toString();
-        User user = authenticationService.getCurrentUser();
+        User user = authenticationService.getCurrentUser();//????
         tlUser.set(user);
         String log = new CBoardActionLog(user, url).toString();
 
-        boolean isNegtiveMatch = false, isPositveMatch = true;
+        boolean isNegtiveMatch = false;
+        boolean isPositveMatch = true;
 
         if (StringUtils.isNotBlank(positveFilter)) {
             isPositveMatch = Pattern.compile(positveFilter).matcher(log).find();
@@ -49,7 +54,7 @@ public class BaseController {
         }
 
         if (user != null && !isNegtiveMatch && isPositveMatch) {
-            LOG.info(log);
+            LOG.info(log); //FIXME 操作日志存到DB中
         }
     }
 }

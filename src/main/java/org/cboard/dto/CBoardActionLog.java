@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON;
 import java.util.Date;
 
 /**
- * Created by zyong on 2017/9/28.
+ * "用户操作日志"实体类
  */
 public class CBoardActionLog {
 
