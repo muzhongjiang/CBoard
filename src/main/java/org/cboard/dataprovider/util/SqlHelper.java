@@ -1,6 +1,6 @@
 package org.cboard.dataprovider.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cboard.dataprovider.config.*;
 
 import java.util.StringJoiner;
@@ -45,6 +45,9 @@ public class SqlHelper {
         return filterSql(filters, "WHERE");
     }
 
+    /**
+     * 创建图表时，根据'列维'，'行维(group by)'，'过滤(where)'，'指标' 拼接sql
+     */
     public String assembleAggDataSql(AggConfig config) throws Exception {
         Stream<DimensionConfig> c = config.getColumns().stream();
         Stream<DimensionConfig> r = config.getRows().stream();

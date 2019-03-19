@@ -1,7 +1,7 @@
 package org.cboard.dataprovider.config;
 
 /**
- * Created by zyong on 2017/1/9.
+ * 指标列定义，包括列名和聚合运算类型
  */
 public class ValueConfig {
     private String column;

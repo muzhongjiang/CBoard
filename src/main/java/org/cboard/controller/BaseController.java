@@ -1,6 +1,6 @@
 package org.cboard.controller;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cboard.dto.CBoardActionLog;
 import org.cboard.dto.User;
 import org.cboard.services.AuthenticationService;

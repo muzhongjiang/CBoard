@@ -2,7 +2,7 @@ package org.cboard.dataprovider;
 
 import com.google.common.collect.Ordering;
 import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;

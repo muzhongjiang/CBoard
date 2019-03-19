@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Created by yfyuan on 2016/11/7.
+ *  缓存方式1：Java heap
  */
 public class HeapCacheManager<T> implements CacheManager<T> {
 

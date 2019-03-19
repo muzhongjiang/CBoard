@@ -1,11 +1,8 @@
 package org.cboard.dataprovider;
 
-import org.cboard.dataprovider.aggregator.InnerAggregator;
-import org.cboard.dataprovider.aggregator.h2.H2Aggregator;
-import org.cboard.dataprovider.aggregator.jvm.JvmAggregator;
+
 import org.cboard.dataprovider.annotation.DatasourceParameter;
 import org.cboard.dataprovider.annotation.ProviderName;
-import org.cboard.dataprovider.annotation.QueryParameter;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -49,9 +46,7 @@ public class DataProviderManager implements ApplicationContextAware {
         return providers.keySet();
     }
 
-    /*public static DataProvider getDataProvider(String type) throws Exception {
-        return getDataProvider(type, null, null);
-    }*/
+
 
     public static DataProvider getDataProvider(
             String type, Map<String, String> dataSource,
@@ -59,6 +54,9 @@ public class DataProviderManager implements ApplicationContextAware {
         return getDataProvider(type, dataSource, query, false);
     }
 
+    /**
+     * 创建DataProvider对象（JdbcDataProvider、ElasticsearchDataProvider、KylinDataProvider）
+     */
     public static DataProvider getDataProvider(
             String type, Map<String, String> dataSource,
             Map<String, String> query,
@@ -67,17 +65,17 @@ public class DataProviderManager implements ApplicationContextAware {
         ProviderName providerName = (ProviderName) c.getAnnotation(ProviderName.class);
         if (providerName.name().equals(type)) {
             DataProvider provider = (DataProvider) c.newInstance();
-            provider.setQuery(query);
-            provider.setDataSource(dataSource);
+            provider.setQuery(query);//数据集（cube）对应sql
+            provider.setDataSource(dataSource);//数据源配置项
             provider.setUsedForTest(isUseForTest);
             if (provider instanceof Initializing) {
                 ((Initializing) provider).afterPropertiesSet();
             }
             applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
-            InnerAggregator innerAggregator = applicationContext.getBean(H2Aggregator.class);
-            innerAggregator.setDataSource(dataSource);
-            innerAggregator.setQuery(query);
-            provider.setInnerAggregator(innerAggregator);
+//            InnerAggregator innerAggregator = applicationContext.getBean(H2Aggregator.class);
+//            innerAggregator.setDataSource(dataSource);
+//            innerAggregator.setQuery(query);
+//            provider.setInnerAggregator(innerAggregator);
             return provider;
         }
         return null;
@@ -98,7 +96,7 @@ public class DataProviderManager implements ApplicationContextAware {
                 e.setAccessible(true);
                 return e.get(o).toString();
             } catch (IllegalAccessException e1) {
-                LOG.error("" , e);
+                LOG.error("", e);
             }
             return null;
         }).collect(Collectors.toList());

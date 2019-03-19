@@ -3,7 +3,7 @@ package org.cboard.dataprovider.config;
 import java.util.List;
 
 /**
- * Created by yfyuan on 2017/1/17.
+ * 维度定义列，包括列名，过滤条件（类型，值），重命名；
  */
 public class DimensionConfig extends ConfigComponent {
     private String columnName;

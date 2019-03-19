@@ -5,7 +5,6 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.googlecode.aviator.AviatorEvaluator;
 import org.cboard.dataprovider.aggregator.Aggregatable;
-import org.cboard.dataprovider.aggregator.InnerAggregator;
 import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.config.CompositeConfig;
 import org.cboard.dataprovider.config.ConfigComponent;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +32,6 @@ public abstract class DataProvider {
     private AuthenticationService authenticationService;
     @Autowired
     private RoleService roleService;
-    private InnerAggregator innerAggregator;
     protected Map<String, String> dataSource;
     protected Map<String, String> query;
     private int resultLimit;
@@ -48,41 +45,24 @@ public abstract class DataProvider {
         AviatorEvaluator.addFunction(new NowFunction());
     }
 
-    public abstract boolean doAggregationInDataSource();
 
-    public boolean isDataSourceAggInstance() {
-        if (this instanceof Aggregatable && doAggregationInDataSource()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
     /**
-     * get the aggregated data by user's widget designer
+     * 通过用户的小部件设计器获取聚合数据
      *
      * @return
      */
     public final AggregateResult getAggData(AggConfig ac, boolean reload) throws Exception {
         evalValueExpression(ac);
-        if (isDataSourceAggInstance()) {
-            return ((Aggregatable) this).queryAggData(ac);
-        } else {
-            checkAndLoad(reload);
-            return innerAggregator.queryAggData(ac);
-        }
+        return ((Aggregatable) this).queryAggData(ac);
     }
 
     public final String getViewAggDataQuery(AggConfig config) throws Exception {
         evalValueExpression(config);
-        if (isDataSourceAggInstance()) {
-            return ((Aggregatable) this).viewAggDataQuery(config);
-        } else {
-            return "Not Support";
-        }
+        return ((Aggregatable) this).viewAggDataQuery(config);
     }
 
     /**
-     * Get the options values of a dimension column
+     * 获取维度列的选项值
      *
      * @param columnName
      * @return
@@ -90,12 +70,8 @@ public abstract class DataProvider {
     public final String[] getDimVals(String columnName, AggConfig config, boolean reload) throws Exception {
         String[] dimVals = null;
         evalValueExpression(config);
-        if (isDataSourceAggInstance()) {
-            dimVals = ((Aggregatable) this).queryDimVals(columnName, config);
-        } else {
-            checkAndLoad(reload);
-            dimVals = innerAggregator.queryDimVals(columnName, config);
-        }
+        dimVals = ((Aggregatable) this).queryDimVals(columnName, config);
+
         return Arrays.stream(dimVals)
                 .map(member -> {
                     return Objects.isNull(member) ? NULL_STRING : member;
@@ -104,29 +80,11 @@ public abstract class DataProvider {
     }
 
     public final String[] invokeGetColumn(boolean reload) throws Exception {
-        String[] columns = null;
-        if (isDataSourceAggInstance()) {
-            columns = ((Aggregatable) this).getColumn();
-        } else {
-            checkAndLoad(reload);
-            columns = innerAggregator.getColumn();
-        }
+        String[] columns = ((Aggregatable) this).getColumn();
         Arrays.sort(columns);
         return columns;
     }
 
-    private void checkAndLoad(boolean reload) throws Exception {
-        String key = getLockKey();
-        synchronized (key.intern()) {
-            if (reload || !innerAggregator.checkExist()) {
-                String[][] data = getData();
-                if (data != null) {
-                    innerAggregator.loadData(data, interval);
-                }
-                logger.info("loadData {}", key);
-            }
-        }
-    }
 
     private void evalValueExpression(AggConfig ac) {
         if (ac == null) {
@@ -219,14 +177,6 @@ public abstract class DataProvider {
         this.interval = interval;
     }
 
-    public InnerAggregator getInnerAggregator() {
-        return innerAggregator;
-    }
-
-    public void setInnerAggregator(InnerAggregator innerAggregator) {
-        this.innerAggregator = innerAggregator;
-    }
-
     public boolean isUsedForTest() {
         return isUsedForTest;
     }
@@ -235,6 +185,10 @@ public abstract class DataProvider {
         isUsedForTest = usedForTest;
     }
 
+
+    /**
+     * 对null值得处理，有默认实现；
+     */
     public static ConfigComponent separateNull(ConfigComponent configComponent) {
         if (configComponent instanceof DimensionConfig) {
             DimensionConfig cc = (DimensionConfig) configComponent;

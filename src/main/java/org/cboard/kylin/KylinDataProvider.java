@@ -71,10 +71,6 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
         return Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString() + JSONObject.toJSON(query).toString(), Charsets.UTF_8).hash().toString();
     }
 
-    @Override
-    public boolean doAggregationInDataSource() {
-        return true;
-    }
 
     @Override
     public String[][] getData() throws Exception {

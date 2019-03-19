@@ -3,7 +3,7 @@ package org.cboard.dataprovider.result;
 import java.util.List;
 
 /**
- * Created by yfyuan on 2017/1/18.
+ * Result类的实现相对简单，为了通用所有数据源，结果的形式为ColumnIndex(列定义)和String[][]二维数据；
  */
 public class AggregateResult {
     private List<ColumnIndex> columnList;

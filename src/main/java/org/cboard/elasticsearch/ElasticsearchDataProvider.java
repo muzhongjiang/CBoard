@@ -117,10 +117,6 @@ public class ElasticsearchDataProvider extends DataProvider implements Aggregata
         numericTypes.add("float");
     }
 
-    @Override
-    public boolean doAggregationInDataSource() {
-        return true;
-    }
 
     @Override
     public String[] queryDimVals(String columnName, AggConfig config) throws Exception {

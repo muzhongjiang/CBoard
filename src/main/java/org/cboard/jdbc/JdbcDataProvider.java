@@ -4,7 +4,6 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
-import com.google.common.base.Stopwatch;
 import com.google.common.hash.Hashing;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +19,6 @@ import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.result.AggregateResult;
 import org.cboard.dataprovider.util.DPCommonUtils;
 import org.cboard.dataprovider.util.SqlHelper;
-import org.cboard.exception.CBoardException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by yfyuan on 2016/8/17.
@@ -89,70 +88,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
     private SqlHelper sqlHelper;
 
     @Override
-    public boolean doAggregationInDataSource() {
-        String v = dataSource.get(aggregateProvider);
-        return v != null && "true".equals(v);
-    }
-
-    @Override
     public String[][] getData() throws Exception {
-        final int batchSize = 100000;
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        LOG.debug("Execute JdbcDataProvider.getData() Start!");
-        String sql = getAsSubQuery(query.get(SQL));
-        List<String[]> list = null;
-        LOG.info("SQL String: " + sql);
-
-        try (Connection con = getConnection();
-             Statement ps = con.createStatement();
-             ResultSet rs = ps.executeQuery(sql)) {
-
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-            list = new LinkedList<>();
-            String[] row = new String[columnCount];
-            for (int i = 0; i < columnCount; i++) {
-                row[i] = metaData.getColumnLabel(i + 1);
-            }
-
-            String[] header = row;
-            getInnerAggregator().beforeLoad(header);
-
-            int resultCount = 0;
-            int threadId = 0;
-            ExecutorService executor = Executors.newFixedThreadPool(5);
-            while (rs.next()) {
-                resultCount++;
-                row = new String[columnCount];
-                for (int j = 0; j < columnCount; j++) {
-                    row[j] = rs.getString(j + 1);
-                }
-                list.add(row);
-
-                if (resultCount % batchSize == 0) {
-                    LOG.info("JDBC load batch {}", resultCount);
-                    final String[][] batchData = list.toArray(new String[][]{});
-                    Thread loadThread = new Thread(() -> {
-                        getInnerAggregator().loadBatch(header, batchData);
-                    }, threadId++ + "");
-                    executor.execute(loadThread);
-                    list.clear();
-                }
-                if (resultCount > resultLimit) {
-                    throw new CBoardException("Cube result count " + resultCount + ", is greater than limit " + resultLimit);
-                }
-            }
-            executor.shutdown();
-            while (!executor.awaitTermination(10, TimeUnit.SECONDS));
-            final String[][] batchData = list.toArray(new String[][]{});
-            getInnerAggregator().loadBatch(header, batchData);
-        } catch (Exception e) {
-            LOG.error("ERROR:" + e.getMessage());
-            throw new Exception("ERROR:" + e.getMessage(), e);
-        }
-        getInnerAggregator().afterLoad();
-        stopwatch.stop();
-        LOG.info("getData() using time: {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         return null;
     }
 
@@ -164,7 +100,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
              Statement ps = con.createStatement()) {
             ps.executeQuery(queryStr);
         } catch (Exception e) {
-            LOG.error("Error when execute: {}",  queryStr);
+            LOG.error("Error when execute: {}", queryStr);
             throw new Exception("ERROR:" + e.getMessage(), e);
         }
     }
@@ -183,6 +119,9 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         return deletedBlankLine.endsWith(";") ? deletedBlankLine.substring(0, deletedBlankLine.length() - 1) : deletedBlankLine;
     }
 
+    /**
+     * 获取jdbc connection （使用druid连接池方式）
+     */
     private Connection getConnection() throws Exception {
         String usePool = dataSource.get(POOLED);
         String username = dataSource.get(USERNAME);
@@ -333,12 +272,12 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 for (int j = 0; j < columnCount; j++) {
                     int columType = metaData.getColumnType(j + 1);
                     switch (columType) {
-                    case java.sql.Types.DATE:
-                        row[j] = rs.getDate(j + 1).toString();
-                        break;
-                    default:
-                        row[j] = rs.getString(j + 1);
-                        break;
+                        case java.sql.Types.DATE:
+                            row[j] = rs.getDate(j + 1).toString();
+                            break;
+                        default:
+                            row[j] = rs.getString(j + 1);
+                            break;
                     }
                 }
                 list.add(row);

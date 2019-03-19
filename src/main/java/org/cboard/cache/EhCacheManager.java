@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.Date;
 
 /**
- * Created by yfyuan on 2017/2/4.
+ *  缓存方式2：EhCache
  */
 public class EhCacheManager<T> implements CacheManager<T>, InitializingBean, DisposableBean {
 

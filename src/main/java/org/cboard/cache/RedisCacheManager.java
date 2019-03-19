@@ -5,7 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by yfyuan on 2016/11/7.
+ *  缓存方式3：Redis
  */
 public class RedisCacheManager<T> implements CacheManager<T> {
 

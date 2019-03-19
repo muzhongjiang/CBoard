@@ -316,13 +316,13 @@ public class DashboardController extends BaseController {
             strParams = Maps.transformValues(queryO, Functions.toStringFunction());
         }
         AggregateResult aggResult = null;
-        // data source aggreagtor instance need not lock
-        boolean isDataSourceAggInstance = dataProviderService.isDataSourceAggInstance(datasourceId, strParams, datasetId);
+        //数据源聚合器实例无需锁定：
+        boolean isDataSourceAggInstance = true;
         String randomFlag = isDataSourceAggInstance ? UUID.randomUUID().toString() : "1";
         String lockString = Hashing.md5().newHasher()
                 .putString(datasourceId + query + datasetId + tlUser.get().getUserId() + randomFlag, Charsets.UTF_8)
                 .hash().toString();
-        synchronized (lockString.intern()) {
+        synchronized (lockString.intern()) {//???
             AggConfig config = ViewAggConfig.getAggConfig(JSONObject.parseObject(cfg, ViewAggConfig.class));
             aggResult = dataProviderService.queryAggData(datasourceId, strParams, datasetId, config, reload);
         }
