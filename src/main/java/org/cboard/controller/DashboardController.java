@@ -44,6 +44,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/dashboard")
 public class DashboardController extends BaseController {
 
+
+    @Autowired
+    private DataProviderManager dataProviderManager;
+    @Autowired
+    private DataProviderViewManager dataProviderViewManager;
+
     @Autowired
     private BoardDao boardDao;
 
@@ -100,8 +106,8 @@ public class DashboardController extends BaseController {
     }
 
     @RequestMapping(value = "/getProviderList")
-    public Set<String> getProviderList() {
-        return DataProviderManager.getProviderList();
+    public String[] getProviderList() {
+        return dataProviderManager.getProviderList();
     }
 
     @RequestMapping(value = "/getConfigParams")
@@ -112,7 +118,7 @@ public class DashboardController extends BaseController {
         if (datasourceId != null) {
             dataSource = dataProviderService.getDataSource(datasourceId);
         }
-        return DataProviderViewManager.getQueryParams(type, page, dataSource);
+        return dataProviderViewManager.getQueryParams(type, page, dataSource);
     }
 
     @RequestMapping(value = "/getConfigView")
@@ -123,17 +129,17 @@ public class DashboardController extends BaseController {
         if (datasourceId != null) {
             dataSource = dataProviderService.getDataSource(datasourceId);
         }
-        return DataProviderViewManager.getQueryView(type, page, dataSource);
+        return dataProviderViewManager.getQueryView(type, page, dataSource);
     }
 
     @RequestMapping(value = "/getDatasourceParams")
     public List<Map<String, Object>> getDatasourceParams(@RequestParam(name = "type") String type) {
-        return DataProviderViewManager.getDatasourceParams(type);
+        return dataProviderViewManager.getDatasourceParams(type);
     }
 
     @RequestMapping(value = "/getDatasourceView")
     public String getDatasourceView(@RequestParam(name = "type") String type) {
-        return DataProviderViewManager.getDatasourceView(type);
+        return dataProviderViewManager.getDatasourceView(type);
     }
 
     @RequestMapping(value = "/saveNewDatasource")

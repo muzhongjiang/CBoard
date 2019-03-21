@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -25,20 +26,23 @@ import java.util.stream.Collectors;
 /**
  * Created by yfyuan on 2016/8/19.
  */
-@Repository
+@Service
 public class DatasourceService {
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private DatasourceDao datasourceDao;
+    @Autowired
+    private DataProviderManager dataProviderManager;
 
     public List<ViewDashboardDatasource> getViewDatasourceList(Supplier<List<DashboardDatasource>> daoQuery) {
         List<DashboardDatasource> list = daoQuery.get();
         List<ViewDashboardDatasource> vlist = list.stream().map(e -> (ViewDashboardDatasource) ViewDashboardDatasource.TO.apply(e)).collect(Collectors.toList());
         vlist.forEach(e -> {
             try {
-                List<String> fields = DataProviderManager.getProviderFieldByType(e.getType(), DatasourceParameter.Type.Password);
+                //所有password不回显：
+                List<String> fields = dataProviderManager.getProviderFieldByType(e.getType(), DatasourceParameter.Type.Password);
                 fields.forEach(f -> {
                     if (e.getConfig().containsKey(f)) {
                         e.getConfig().put(f, "");

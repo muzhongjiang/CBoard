@@ -18,7 +18,8 @@ import org.cboard.util.NaturalOrderComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,13 +29,16 @@ import java.util.stream.Stream;
  */
 public abstract class DataProvider {
 
+    @Value("${dataprovider.resultLimit:300000}")
+    protected int resultLimit;
+
     @Autowired
     private AuthenticationService authenticationService;
     @Autowired
     private RoleService roleService;
     protected Map<String, String> dataSource;
     protected Map<String, String> query;
-    private int resultLimit;
+
     private boolean isUsedForTest = false;
     private long interval = 12 * 60 * 60; // second
 
@@ -42,7 +46,7 @@ public abstract class DataProvider {
     private static final Logger logger = LoggerFactory.getLogger(DataProvider.class);
 
     static {
-        AviatorEvaluator.addFunction(new NowFunction());
+        AviatorEvaluator.addFunction(new NowFunction());// FIXME ?????
     }
 
 

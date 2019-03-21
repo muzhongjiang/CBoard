@@ -11,6 +11,13 @@ public class HeapCacheManager<T> implements CacheManager<T> {
 
     private ConcurrentMap<String, CacheObject> cache = new ConcurrentHashMap<>();
 
+    /**
+     * 默认构造方法
+     */
+    public HeapCacheManager() {
+
+    }
+
     @Override
     public void put(String key, T data, long expire) {
         cache.put(key, new CacheObject(new Date().getTime(), expire, data));

@@ -33,6 +33,9 @@ public class DataProviderService {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
+    private DataProviderManager dataProviderManager;
+
+    @Autowired
     private DatasourceDao datasourceDao;
 
     @Autowired
@@ -46,7 +49,7 @@ public class DataProviderService {
         DashboardDatasource datasource = datasourceDao.getDatasource(datasourceId);
         JSONObject datasourceConfig = JSONObject.parseObject(datasource.getConfig());
         Map<String, String> dataSource = Maps.transformValues(datasourceConfig, Functions.toStringFunction());
-        DataProvider dataProvider = DataProviderManager.getDataProvider(datasource.getType(), dataSource, query);
+        DataProvider dataProvider = dataProviderManager.getDataProvider(datasource.getType(), dataSource, query);
         if (dataset != null && dataset.getInterval() != null && dataset.getInterval() > 0) {
             dataProvider.setInterval(dataset.getInterval());
         }
@@ -66,7 +69,7 @@ public class DataProviderService {
             DataProvider dataProvider = getDataProvider(datasourceId, query, dataset);
             return dataProvider.getAggData(config, reload);
         } catch (Exception e) {
-            LOG.error("", e);
+            LOG.error("{}", e);
             throw new CBoardException(e.getMessage());
         }
     }
@@ -113,7 +116,7 @@ public class DataProviderService {
 
     public ServiceStatus test(JSONObject dataSource, Map<String, String> query) {
         try {
-            DataProvider dataProvider = DataProviderManager.getDataProvider(
+            DataProvider dataProvider = dataProviderManager.getDataProvider(
                     dataSource.getString("type"),
                     Maps.transformValues(dataSource.getJSONObject("config"), Functions.toStringFunction()),
                     query, true);

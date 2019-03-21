@@ -5,7 +5,7 @@ import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
-import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.cboard.cache.CacheManager;
 import org.cboard.cache.HeapCacheManager;
@@ -13,7 +13,6 @@ import org.cboard.dataprovider.DataProvider;
 import org.cboard.dataprovider.Initializing;
 import org.cboard.dataprovider.aggregator.Aggregatable;
 import org.cboard.dataprovider.annotation.DatasourceParameter;
-import org.cboard.dataprovider.annotation.ProviderName;
 import org.cboard.dataprovider.annotation.QueryParameter;
 import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.result.AggregateResult;
@@ -21,7 +20,8 @@ import org.cboard.dataprovider.util.DPCommonUtils;
 import org.cboard.dataprovider.util.SqlHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -29,16 +29,16 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+//import org.apache.commons.collections4.map.HashedMap;
+
 /**
  * Created by yfyuan on 2016/8/17.
  */
-@ProviderName(name = "jdbc")
+@Component("jdbc")
+@Scope("prototype")
 public class JdbcDataProvider extends DataProvider implements Aggregatable, Initializing {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcDataProvider.class);
-
-    @Value("${dataprovider.resultLimit:300000}")
-    private int resultLimit;
 
     @DatasourceParameter(label = "{{'DATAPROVIDER.JDBC.DRIVER'|translate}} *",
             type = DatasourceParameter.Type.Input,
@@ -127,14 +127,14 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         String username = dataSource.get(USERNAME);
         String password = dataSource.get(PASSWORD);
         Connection conn = null;
-        if (usePool != null && "true".equals(usePool)) {
+        if ("true".equals(usePool)) {
             String key = Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString(), Charsets.UTF_8).hash().toString();
             DataSource ds = datasourceMap.get(key);
             if (ds == null) {
                 synchronized (key.intern()) {
                     ds = datasourceMap.get(key);
                     if (ds == null) {
-                        Map<String, String> conf = new HashedMap();
+                        Map<String, String> conf = new HashedMap<>();
                         conf.put(DruidDataSourceFactory.PROP_DRIVERCLASSNAME, dataSource.get(DRIVER));
                         conf.put(DruidDataSourceFactory.PROP_URL, dataSource.get(JDBC_URL));
                         conf.put(DruidDataSourceFactory.PROP_USERNAME, dataSource.get(USERNAME));
@@ -183,7 +183,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         }
         fsql = "SELECT cb_view.%s FROM (\n%s\n) cb_view %s GROUP BY cb_view.%s";
         exec = String.format(fsql, columnName, sql, whereStr, columnName);
-        LOG.info("【{}】",exec);
+        LOG.info("【{}】", exec);
         try (Connection connection = getConnection();
              Statement stat = connection.createStatement();
              ResultSet rs = stat.executeQuery(exec)) {
@@ -191,7 +191,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 filtered.add(rs.getString(1));
             }
         } catch (Exception e) {
-            LOG.error("ERROR:{}" , e.getMessage());
+            LOG.error("ERROR:{}", e.getMessage());
             throw new Exception("ERROR:" + e.getMessage(), e);
         }
         return filtered.toArray(new String[]{});
@@ -204,11 +204,11 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
             stat.setMaxRows(100);
             String fsql = "\nSELECT * FROM (\n%s\n) cb_view WHERE 1=0";
             String sql = String.format(fsql, subQuerySql);
-            LOG.info("【{}】",sql);
+            LOG.info("【{}】", sql);
             ResultSet rs = stat.executeQuery(sql);
             metaData = rs.getMetaData();
         } catch (Exception e) {
-            LOG.error("ERROR:{}" , e.getMessage());
+            LOG.error("ERROR:{}", e.getMessage());
             throw new Exception("ERROR:" + e.getMessage(), e);
         }
         return metaData;
@@ -228,7 +228,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 String subQuerySql = getAsSubQuery(query.get(SQL));
                 ResultSetMetaData metaData = getMetaData(subQuerySql, stat);
                 int columnCount = metaData.getColumnCount();
-                result = new HashedMap();
+                result = new HashedMap<>();
                 for (int i = 0; i < columnCount; i++) {
                     result.put(metaData.getColumnLabel(i + 1).toUpperCase(), metaData.getColumnType(i + 1));
                 }
@@ -259,7 +259,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
     public AggregateResult queryAggData(AggConfig config) throws Exception {
         String exec = sqlHelper.assembleAggDataSql(config);
         List<String[]> list = new LinkedList<>();
-        LOG.info("【{}】",exec);
+        LOG.info("【{}】", exec);
         try (
                 Connection connection = getConnection();
                 Statement stat = connection.createStatement();

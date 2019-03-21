@@ -24,12 +24,10 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.cboard.cache.CacheManager;
-import org.cboard.cache.HeapCacheManager;
 import org.cboard.dataprovider.DataProvider;
 import org.cboard.dataprovider.Initializing;
 import org.cboard.dataprovider.aggregator.Aggregatable;
 import org.cboard.dataprovider.annotation.DatasourceParameter;
-import org.cboard.dataprovider.annotation.ProviderName;
 import org.cboard.dataprovider.annotation.QueryParameter;
 import org.cboard.dataprovider.config.*;
 import org.cboard.dataprovider.result.AggregateResult;
@@ -38,6 +36,9 @@ import org.cboard.elasticsearch.query.QueryBuilder;
 import org.cboard.util.json.JSONBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.*;
@@ -51,9 +52,10 @@ import static org.cboard.elasticsearch.query.QueryBuilder.*;
 import static org.cboard.util.SqlMethod.coalesce;
 
 /**
- * Created by yfyuan on 2017/3/17.
+ * ElasticsearchDataProvider
  */
-@ProviderName(name = "Elasticsearch")
+@Component("elasticsearch")//bean名称同时作为DataProvider名称
+@Scope("prototype") //多实例
 public class ElasticsearchDataProvider extends DataProvider implements Aggregatable, Initializing {
 
     private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchDataProvider.class);
@@ -100,7 +102,9 @@ public class ElasticsearchDataProvider extends DataProvider implements Aggregata
 
     private JSONObject overrideAggregations = new JSONObject();
 
-    private static final CacheManager<Map<String, String>> typesCache = new HeapCacheManager<>();
+    //cache:
+    @Autowired
+    private CacheManager<Map<String, String>> typesCache;
 
     private static final JSONPath jsonPath_value = JSONPath.compile("$..value");
 

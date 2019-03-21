@@ -4,12 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import org.cboard.cache.CacheManager;
-import org.cboard.cache.HeapCacheManager;
 import org.cboard.dataprovider.DataProvider;
 import org.cboard.dataprovider.Initializing;
 import org.cboard.dataprovider.aggregator.Aggregatable;
 import org.cboard.dataprovider.annotation.DatasourceParameter;
-import org.cboard.dataprovider.annotation.ProviderName;
 import org.cboard.dataprovider.annotation.QueryParameter;
 import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.config.ConfigComponent;
@@ -21,6 +19,9 @@ import org.cboard.kylin.model.KylinBaseModel;
 import org.cboard.kylin.model.KylinModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.*;
@@ -30,7 +31,8 @@ import java.util.stream.Stream;
 /**
  * Created by yfyuan on 2017/3/6.
  */
-@ProviderName(name = "kylin")
+@Component("kylin")
+@Scope("prototype")
 public class KylinDataProvider extends DataProvider implements Aggregatable, Initializing {
 
     private static final Logger LOG = LoggerFactory.getLogger(KylinDataProvider.class);
@@ -62,7 +64,10 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
     @QueryParameter(label = "Data Model *", type = QueryParameter.Type.Input, required = true)
     public static final String DATA_MODEL = "datamodel";
 
-    private static final CacheManager<KylinBaseModel> modelCache = new HeapCacheManager<>();
+
+    //cache:
+    @Autowired
+    private CacheManager<KylinBaseModel> modelCache;
 
     private KylinBaseModel kylinModel;
     private SqlHelper sqlHelper;
@@ -116,7 +121,7 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
         Properties props = new Properties();
         props.setProperty("user", username);
         props.setProperty("password", password);
-        return DriverManager.getConnection(String.format("jdbc:kylin:%S//%s/%s", timeZone ,dataSource.get(SERVERIP), query.get(PROJECT)), props);
+        return DriverManager.getConnection(String.format("jdbc:kylin:%S//%s/%s", timeZone, dataSource.get(SERVERIP), query.get(PROJECT)), props);
     }
 
     @Override
@@ -142,7 +147,7 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
                             return true;
                         }
                     });
-            whereStr =  sqlHelper.assembleFilterSql(filterHelpers);
+            whereStr = sqlHelper.assembleFilterSql(filterHelpers);
         }
         fsql = "SELECT %s FROM %s %s %s GROUP BY %s ORDER BY %s";
         exec = String.format(fsql, columnAliasName, kylinModel.formatTableName(tableName), kylinModel.formatTableName(kylinModel.getAliasfromColumn(columnName)), whereStr, columnAliasName, columnAliasName);
@@ -197,12 +202,12 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
                 for (int j = 0; j < columnCount; j++) {
                     int columType = metaData.getColumnType(j + 1);
                     switch (columType) {
-                    case java.sql.Types.DATE:
-                        row[j] = rs.getDate(j + 1).toString();
-                        break;
-                    default:
-                        row[j] = rs.getString(j + 1);
-                        break;
+                        case java.sql.Types.DATE:
+                            row[j] = rs.getDate(j + 1).toString();
+                            break;
+                        default:
+                            row[j] = rs.getString(j + 1);
+                            break;
                     }
                 }
                 list.add(row);

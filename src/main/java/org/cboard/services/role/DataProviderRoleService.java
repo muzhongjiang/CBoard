@@ -13,7 +13,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Repository;
 
 /**
- * Created by yfyuan on 2016/12/23.
+ * AOP
  */
 @Repository
 @Aspect

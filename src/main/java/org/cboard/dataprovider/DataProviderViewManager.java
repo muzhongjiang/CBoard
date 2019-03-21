@@ -12,6 +12,8 @@ import org.cboard.dataprovider.annotation.QueryParameter;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -22,9 +24,14 @@ import java.util.*;
 /**
  * Created by yfyuan on 2016/8/15.
  */
+@Component
 public class DataProviderViewManager {
 
-    private static Logger LOG = LoggerFactory.getLogger(DataProviderViewManager.class);
+
+    @Autowired
+    private DataProviderManager dataProviderManager;
+
+    private final static Logger LOG = LoggerFactory.getLogger(DataProviderViewManager.class);
 
     private static VelocityEngine velocityEngine;
 
@@ -45,15 +52,14 @@ public class DataProviderViewManager {
         velocityEngine = new VelocityEngine(props);
     }
 
-    private static Map<String, String> rendered = new HashMap<>();
+    private  Map<String, String> rendered = new HashMap<>();
 
-    public static List<Map<String, Object>> getQueryParams(String type, String page, Map<String, String> dataSource) {
-        Class clz = DataProviderManager.getDataProviderClass(type);
-        Set<Field> fieldSet = ReflectionUtils.getAllFields(clz, ReflectionUtils.withAnnotation(QueryParameter.class));
+    public  List<Map<String, Object>> getQueryParams(String type, String page, Map<String, String> dataSource) {
+        DataProvider  provider= dataProviderManager.getProviderByName(type);
+        Set<Field> fieldSet = ReflectionUtils.getAllFields(provider.getClass(), ReflectionUtils.withAnnotation(QueryParameter.class));
         List<Field> fieldList = fieldOrdering.sortedCopy(fieldSet);
         List<Map<String, Object>> params = null;
         try {
-            Object o = clz.newInstance();
             params = new ArrayList<>();
             for (Field field : fieldList) {
                 field.setAccessible(true);
@@ -61,23 +67,23 @@ public class DataProviderViewManager {
                 Map<String, Object> param = new HashMap<>();
                 param.put("label", queryParameter.label());
                 param.put("type", queryParameter.type().toString());
-                param.put("name", (String) field.get(o));
+                param.put("name", (String) field.get(provider));
                 param.put("placeholder", queryParameter.placeholder());
                 param.put("value", queryParameter.value());
                 param.put("options", queryParameter.options());
                 String optionsMethod = queryParameter.optionsMethod();
                 try {
                     if (StringUtils.isNotBlank(optionsMethod) && dataSource != null) {
-                        for (Class supClz = clz; supClz != Object.class; supClz = supClz.getSuperclass()) {
+                        for (Class supClz = provider.getClass(); supClz != Object.class; supClz = supClz.getSuperclass()) {
                             if (supClz == DataProvider.class) {
                                 Field f = supClz.getDeclaredField("dataSource");
                                 f.setAccessible(true);
-                                f.set(o, dataSource);
+                                f.set(provider, dataSource);
                             }
                         }
-                        Method method = clz.getDeclaredMethod(optionsMethod);
+                        Method method =  provider.getClass().getDeclaredMethod(optionsMethod);
                         method.setAccessible(true);
-                        param.put("options", method.invoke(o));
+                        param.put("options", method.invoke(provider));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -106,7 +112,7 @@ public class DataProviderViewManager {
         return params;
     }
 
-    public static String getQueryView(String type, String page, Map<String, String> dataSource) {
+    public  String getQueryView(String type, String page, Map<String, String> dataSource) {
         List<Map<String, Object>> params = getQueryParams(type, page, dataSource);
         if (params != null && params.size() > 0) {
             VelocityContext context = new VelocityContext();
@@ -118,13 +124,12 @@ public class DataProviderViewManager {
         return null;
     }
 
-    public static List<Map<String, Object>> getDatasourceParams(String type) {
-        Class clz = DataProviderManager.getDataProviderClass(type);
-        Set<Field> fieldSet = ReflectionUtils.getAllFields(clz, ReflectionUtils.withAnnotation(DatasourceParameter.class));
+    public  List<Map<String, Object>> getDatasourceParams(String type) {
+        DataProvider  provider= dataProviderManager.getProviderByName(type);
+        Set<Field> fieldSet = ReflectionUtils.getAllFields(provider.getClass(), ReflectionUtils.withAnnotation(DatasourceParameter.class));
         List<Field> fieldList = fieldOrdering.sortedCopy(fieldSet);
         List<Map<String, Object>> params = null;
         try {
-            Object o = clz.newInstance();
             params = new ArrayList<>();
             for (Field field : fieldList) {
                 field.setAccessible(true);
@@ -132,7 +137,7 @@ public class DataProviderViewManager {
                 Map<String, Object> param = new HashMap<>();
                 param.put("label", datasourceParameter.label());
                 param.put("type", datasourceParameter.type().toString());
-                param.put("name", (String) field.get(o));
+                param.put("name", (String) field.get(provider));
                 param.put("placeholder", datasourceParameter.placeholder());
                 param.put("value", datasourceParameter.value());
                 param.put("options", datasourceParameter.options());
@@ -146,7 +151,7 @@ public class DataProviderViewManager {
         return params;
     }
 
-    public static String getDatasourceView(String type) {
+    public  String getDatasourceView(String type) {
         List<Map<String, Object>> params = getDatasourceParams(type);
         if (params != null && params.size() > 0) {
             VelocityContext context = new VelocityContext();
@@ -158,7 +163,7 @@ public class DataProviderViewManager {
         return null;
     }
 
-    private static Ordering<Field> fieldOrdering = Ordering.from(new Comparator<Field>() {
+    private  Ordering<Field> fieldOrdering = Ordering.from(new Comparator<Field>() {
         @Override
         public int compare(Field o1, Field o2) {
             return Integer.compare(getOrder(o1), getOrder(o2));
