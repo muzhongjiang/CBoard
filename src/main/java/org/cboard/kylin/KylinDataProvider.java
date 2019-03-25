@@ -17,8 +17,6 @@ import org.cboard.dataprovider.util.DPCommonUtils;
 import org.cboard.dataprovider.util.SqlHelper;
 import org.cboard.kylin.model.KylinBaseModel;
 import org.cboard.kylin.model.KylinModelFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -34,8 +32,7 @@ import java.util.stream.Stream;
 @Component("kylin")
 @Scope("prototype")
 public class KylinDataProvider extends DataProvider implements Aggregatable, Initializing {
-
-    private static final Logger LOG = LoggerFactory.getLogger(KylinDataProvider.class);
+    private final String driver="org.apache.kylin.jdbc.Driver";
 
     @DatasourceParameter(label = "Kylin Server *",
             type = DatasourceParameter.Type.Input,
@@ -65,10 +62,6 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
     public static final String DATA_MODEL = "datamodel";
 
 
-    //cache:
-    @Autowired
-    private CacheManager<KylinBaseModel> modelCache;
-
     private KylinBaseModel kylinModel;
     private SqlHelper sqlHelper;
 
@@ -76,11 +69,6 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
         return Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString() + JSONObject.toJSON(query).toString(), Charsets.UTF_8).hash().toString();
     }
 
-
-    @Override
-    public String[][] getData() throws Exception {
-        return null;
-    }
 
     @Override
     public void test() throws Exception {
@@ -113,11 +101,10 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
     }
 
     private Connection getConnection() throws Exception {
-
         String username = dataSource.get(USERNAME);
         String password = dataSource.get(PASSWORD);
         String timeZone = "timeZone=CST";
-        Class.forName("org.apache.kylin.jdbc.Driver");
+        Class.forName(driver);
         Properties props = new Properties();
         props.setProperty("user", username);
         props.setProperty("password", password);
@@ -126,8 +113,6 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
 
     @Override
     public String[] queryDimVals(String columnName, AggConfig config) throws Exception {
-        String fsql = null;
-        String exec = null;
         List<String> filtered = new ArrayList<>();
         String tableName = kylinModel.getTableOfColumn(columnName);
         String columnAliasName = kylinModel.getColumnWithAliasPrefix(columnName);
@@ -149,8 +134,8 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
                     });
             whereStr = sqlHelper.assembleFilterSql(filterHelpers);
         }
-        fsql = "SELECT %s FROM %s %s %s GROUP BY %s ORDER BY %s";
-        exec = String.format(fsql, columnAliasName, kylinModel.formatTableName(tableName), kylinModel.formatTableName(kylinModel.getAliasfromColumn(columnName)), whereStr, columnAliasName, columnAliasName);
+        String fsql = "SELECT %s FROM %s %s %s GROUP BY %s ORDER BY %s";
+        String exec = String.format(fsql, columnAliasName, kylinModel.formatTableName(tableName), kylinModel.formatTableName(kylinModel.getAliasfromColumn(columnName)), whereStr, columnAliasName, columnAliasName);
         LOG.info(exec);
         try (Connection connection = getConnection();
              Statement stat = connection.createStatement();
@@ -167,13 +152,13 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
 
     private KylinBaseModel getModel(boolean reload) throws Exception {
         String key = getKey(dataSource, query);
-        KylinBaseModel model = modelCache.get(key);
+        KylinBaseModel model = (KylinBaseModel)cache.get(key);
         if (model == null || reload) {
             synchronized (key.intern()) {
-                model = modelCache.get(key);
+                model = (KylinBaseModel)cache.get(key);
                 if (model == null || reload) {
                     model = KylinModelFactory.getKylinModel(dataSource, query);
-                    modelCache.put(key, model, 1 * 60 * 60 * 1000);
+                    cache.put(key, model, cacheExpire);
                 }
             }
         }
@@ -187,7 +172,8 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
 
     @Override
     public AggregateResult queryAggData(AggConfig config) throws Exception {
-        String exec = sqlHelper.assembleAggDataSql(config);
+        String exec = SqlHelper.limitSql(driver, sqlHelper.assembleAggDataSql(config), resultLimit);
+
         List<String[]> list = new LinkedList<>();
         LOG.info(exec);
         try (

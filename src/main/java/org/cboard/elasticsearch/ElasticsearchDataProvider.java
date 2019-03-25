@@ -23,7 +23,6 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.cboard.cache.CacheManager;
 import org.cboard.dataprovider.DataProvider;
 import org.cboard.dataprovider.Initializing;
 import org.cboard.dataprovider.aggregator.Aggregatable;
@@ -33,10 +32,8 @@ import org.cboard.dataprovider.config.*;
 import org.cboard.dataprovider.result.AggregateResult;
 import org.cboard.dataprovider.result.ColumnIndex;
 import org.cboard.elasticsearch.query.QueryBuilder;
+
 import org.cboard.util.json.JSONBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -57,8 +54,6 @@ import static org.cboard.util.SqlMethod.coalesce;
 @Component("elasticsearch")//bean名称同时作为DataProvider名称
 @Scope("prototype") //多实例
 public class ElasticsearchDataProvider extends DataProvider implements Aggregatable, Initializing {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchDataProvider.class);
 
     @DatasourceParameter(label = "Elasticsearch Server *",
             type = DatasourceParameter.Type.Input,
@@ -101,10 +96,6 @@ public class ElasticsearchDataProvider extends DataProvider implements Aggregata
     private String CHARSET = "charset";
 
     private JSONObject overrideAggregations = new JSONObject();
-
-    //cache:
-    @Autowired
-    private CacheManager<Map<String, String>> typesCache;
 
     private static final JSONPath jsonPath_value = JSONPath.compile("$..value");
 
@@ -395,29 +386,31 @@ public class ElasticsearchDataProvider extends DataProvider implements Aggregata
 
     @Override
     public String[] getColumn() throws Exception {
-        typesCache.remove(getKey());
+        cache.remove(getKey());
         Map<String, String> types = getTypes();
         return types.keySet().toArray(new String[0]);
     }
 
     private Map<String, String> getTypes() throws Exception {
         String key = getKey();
-        Map<String, String> types = typesCache.get(key);
+        Map<String, String> types = (Map<String, String>) cache.get(key);
         if (types == null) {
             synchronized (key.intern()) {
-                types = typesCache.get(key);
+                types = (Map<String, String>) cache.get(key);
                 if (types == null) {
                     JSONObject mapping = get(getMappingUrl());
                     mapping = mapping.getJSONObject(mapping.keySet().iterator().next()).getJSONObject("mappings").getJSONObject(query.get(TYPE));
                     types = new HashMap<>();
                     getField(types, new DefaultMapEntry(null, mapping), null);
-                    typesCache.put(key, types, 1 * 60 * 60 * 1000);
+                    cache.put(key, types, cacheExpire);
                 }
             }
         }
         return types;
     }
 
+
+    //FIXME aggregations的resultLimit
     @Override
     public AggregateResult queryAggData(AggConfig config) throws Exception {
         LOG.info("queryAggData");
@@ -554,10 +547,6 @@ public class ElasticsearchDataProvider extends DataProvider implements Aggregata
         return aggregation;
     }
 
-    @Override
-    public String[][] getData() throws Exception {
-        return null;
-    }
 
     @Override
     public void test() throws Exception {

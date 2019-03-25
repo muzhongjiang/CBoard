@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- *  缓存方式1：Java heap
+ * 缓存方式1：Java heap
  */
 public class HeapCacheManager<T> implements CacheManager<T> {
 
@@ -26,9 +26,13 @@ public class HeapCacheManager<T> implements CacheManager<T> {
     @Override
     public T get(String key) {
         CacheObject o = cache.get(key);
-        if (o == null || new Date().getTime() >= o.getT1() + o.getExpire())
+
+        if (o == null) {//等于null
             return null;
-        else {
+        } else if (System.currentTimeMillis() >= o.getT1() + o.getExpire()) {//不等于null，但失效！
+            cache.remove(key);//删除失效的key
+            return null;
+        } else {
             return (T) o.getD();
         }
     }
@@ -37,5 +41,6 @@ public class HeapCacheManager<T> implements CacheManager<T> {
     public void remove(String key) {
         cache.remove(key);
     }
+
 
 }

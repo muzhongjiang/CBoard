@@ -388,6 +388,9 @@ public class DashboardController extends BaseController {
         return jobService.exec(tlUser.get().getUserId(), id);
     }
 
+    /**
+     * 报表导出excel文件
+     */
     @RequestMapping(value = "/exportBoard")
     public ResponseEntity<byte[]> exportBoard(@RequestParam(name = "id") Long id) {
         HttpHeaders headers = new HttpHeaders();

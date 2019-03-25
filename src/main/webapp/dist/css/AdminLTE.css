@@ -1863,7 +1863,7 @@ a:focus {
 }
 .box-header > .box-tools {
   position: absolute;
-  right: 10px;
+  right: 0px;
   top: 5px;
 }
 .box-header > .box-tools [data-toggle="tooltip"] {

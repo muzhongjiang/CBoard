@@ -12,12 +12,14 @@ public class CBoardActionLog {
     private User user;
     private String requestUrl;
     private Date actionTime = new Date();
+    private String ip;
 
     public CBoardActionLog() {}
 
-    public CBoardActionLog(User user, String requestUrl) {
+    public CBoardActionLog(User user, String requestUrl,String ip) {
         this.user = user;
         this.requestUrl = requestUrl;
+        this.ip=ip;
     }
 
     public User getUser() {
@@ -30,6 +32,10 @@ public class CBoardActionLog {
 
     public String getRequestUrl() {
         return requestUrl;
+    }
+
+    public String getIp() {
+        return ip;
     }
 
     public void setRequestUrl(String requestUrl) {

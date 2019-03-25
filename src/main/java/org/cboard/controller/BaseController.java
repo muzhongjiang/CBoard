@@ -1,6 +1,7 @@
 package org.cboard.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cboard.dataprovider.NetworkUtils;
 import org.cboard.dto.CBoardActionLog;
 import org.cboard.dto.User;
 import org.cboard.services.AuthenticationService;
@@ -40,7 +41,8 @@ public class BaseController {
         String url = request.getRequestURL().toString();
         User user = authenticationService.getCurrentUser();//????
         tlUser.set(user);
-        String log = new CBoardActionLog(user, url).toString();
+        String ip= NetworkUtils.getIPAddress(request);
+        String log = new CBoardActionLog(user, url,ip).toString();
 
         boolean isNegtiveMatch = false;
         boolean isPositveMatch = true;
@@ -57,4 +59,5 @@ public class BaseController {
             LOG.info(log); //FIXME 操作日志存到DB中
         }
     }
+
 }

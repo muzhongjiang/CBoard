@@ -7,8 +7,7 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
-import org.cboard.cache.CacheManager;
-import org.cboard.cache.HeapCacheManager;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.cboard.dataprovider.DataProvider;
 import org.cboard.dataprovider.Initializing;
 import org.cboard.dataprovider.aggregator.Aggregatable;
@@ -18,18 +17,18 @@ import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.result.AggregateResult;
 import org.cboard.dataprovider.util.DPCommonUtils;
 import org.cboard.dataprovider.util.SqlHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-//import org.apache.commons.collections4.map.HashedMap;
 
 /**
  * Created by yfyuan on 2016/8/17.
@@ -38,7 +37,6 @@ import java.util.concurrent.ConcurrentMap;
 @Scope("prototype")
 public class JdbcDataProvider extends DataProvider implements Aggregatable, Initializing {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JdbcDataProvider.class);
 
     @DatasourceParameter(label = "{{'DATAPROVIDER.JDBC.DRIVER'|translate}} *",
             type = DatasourceParameter.Type.Input,
@@ -81,16 +79,10 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
             order = 1)
     private String SQL = "sql";
 
-    private static final CacheManager<Map<String, Integer>> typeCahce = new HeapCacheManager<>();
-
     private static final ConcurrentMap<String, DataSource> datasourceMap = new ConcurrentHashMap<>();
 
     private SqlHelper sqlHelper;
 
-    @Override
-    public String[][] getData() throws Exception {
-        return null;
-    }
 
     @Override
     public void test() throws Exception {
@@ -107,9 +99,9 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
 
 
     /**
-     * Convert the sql text to subquery string:
-     * remove blank line
-     * remove end semicolon ;
+     * 将sql文本转换为子查询字符串:
+     * 删除空行
+     * 删除结束分号
      *
      * @param rawQueryText
      * @return
@@ -123,52 +115,41 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
      * 获取jdbc connection （使用druid连接池方式）
      */
     private Connection getConnection() throws Exception {
-        String usePool = dataSource.get(POOLED);
+//        String usePool = dataSource.get(POOLED);//是否使用jdbc连接池
         String username = dataSource.get(USERNAME);
         String password = dataSource.get(PASSWORD);
         Connection conn = null;
-        if ("true".equals(usePool)) {
-            String key = Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString(), Charsets.UTF_8).hash().toString();
-            DataSource ds = datasourceMap.get(key);
-            if (ds == null) {
-                synchronized (key.intern()) {
-                    ds = datasourceMap.get(key);
-                    if (ds == null) {
-                        Map<String, String> conf = new HashedMap<>();
-                        conf.put(DruidDataSourceFactory.PROP_DRIVERCLASSNAME, dataSource.get(DRIVER));
-                        conf.put(DruidDataSourceFactory.PROP_URL, dataSource.get(JDBC_URL));
-                        conf.put(DruidDataSourceFactory.PROP_USERNAME, dataSource.get(USERNAME));
-                        if (StringUtils.isNotBlank(password)) {
-                            conf.put(DruidDataSourceFactory.PROP_PASSWORD, dataSource.get(PASSWORD));
-                        }
-                        conf.put(DruidDataSourceFactory.PROP_INITIALSIZE, "3");
-                        DruidDataSource druidDS = (DruidDataSource) DruidDataSourceFactory.createDataSource(conf);
-                        druidDS.setBreakAfterAcquireFailure(true);
-                        druidDS.setConnectionErrorRetryAttempts(5);
-                        datasourceMap.put(key, druidDS);
-                        ds = datasourceMap.get(key);
+// if ("true".equals(usePool)) {//都用jdbc连接池
+        String key = Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString(), Charsets.UTF_8).hash().toString();
+        DataSource ds = datasourceMap.get(key);
+        if (ds == null) {
+            synchronized (key.intern()) {
+                ds = datasourceMap.get(key);
+                if (ds == null) {
+                    Map<String, String> conf = new HashedMap<>();
+                    conf.put(DruidDataSourceFactory.PROP_DRIVERCLASSNAME, dataSource.get(DRIVER));
+                    conf.put(DruidDataSourceFactory.PROP_URL, dataSource.get(JDBC_URL));
+                    conf.put(DruidDataSourceFactory.PROP_USERNAME, dataSource.get(USERNAME));
+                    if (StringUtils.isNotBlank(password)) {
+                        conf.put(DruidDataSourceFactory.PROP_PASSWORD, dataSource.get(PASSWORD));
                     }
+                    conf.put(DruidDataSourceFactory.PROP_INITIALSIZE, "3");
+                    DruidDataSource druidDS = (DruidDataSource) DruidDataSourceFactory.createDataSource(conf);
+                    druidDS.setBreakAfterAcquireFailure(true);
+                    druidDS.setConnectionErrorRetryAttempts(5);
+                    datasourceMap.put(key, druidDS);
+                    ds = datasourceMap.get(key);
                 }
             }
-            try {
-                conn = ds.getConnection();
-            } catch (SQLException e) {
-                datasourceMap.remove(key);
-                throw e;
-            }
-            return conn;
-        } else {
-            String driver = dataSource.get(DRIVER);
-            String jdbcurl = dataSource.get(JDBC_URL);
-
-            Class.forName(driver);
-            Properties props = new Properties();
-            props.setProperty("user", username);
-            if (StringUtils.isNotBlank(password)) {
-                props.setProperty("password", password);
-            }
-            return DriverManager.getConnection(jdbcurl, props);
         }
+        try {
+            conn = ds.getConnection();
+        } catch (SQLException e) {
+            datasourceMap.remove(key);
+            throw e;
+        }
+        return conn;
+
     }
 
     @Override
@@ -197,14 +178,13 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         return filtered.toArray(new String[]{});
     }
 
-
     private ResultSetMetaData getMetaData(String subQuerySql, Statement stat) throws Exception {
         ResultSetMetaData metaData;
         try {
-            stat.setMaxRows(100);
-            String fsql = "\nSELECT * FROM (\n%s\n) cb_view WHERE 1=0";
+            //stat.setMaxRows(100);
+            String fsql = "\nSELECT * FROM (\n%s\n) cb_view WHERE 1=0";//WHERE 1=0 不需要返回数据，只需要元数据
             String sql = String.format(fsql, subQuerySql);
-            LOG.info("【{}】", sql);
+            LOG.info("getMetaData  sql=【{}】", sql);
             ResultSet rs = stat.executeQuery(sql);
             metaData = rs.getMetaData();
         } catch (Exception e) {
@@ -214,10 +194,13 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         return metaData;
     }
 
+    /**
+     * 获取column名称和对应column type
+     */
     private Map<String, Integer> getColumnType() throws Exception {
         Map<String, Integer> result = null;
         String key = getLockKey();
-        result = typeCahce.get(key);
+        result = (Map<String, Integer>) cache.get(key);
         if (result != null) {
             return result;
         } else {
@@ -232,7 +215,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 for (int i = 0; i < columnCount; i++) {
                     result.put(metaData.getColumnLabel(i + 1).toUpperCase(), metaData.getColumnType(i + 1));
                 }
-                typeCahce.put(key, result, 12 * 60 * 60 * 1000);
+                cache.put(key, result, cacheExpire);
                 return result;
             }
         }
@@ -255,9 +238,11 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         }
     }
 
+
+    //FIXME
     @Override
     public AggregateResult queryAggData(AggConfig config) throws Exception {
-        String exec = sqlHelper.assembleAggDataSql(config);
+        String exec = SqlHelper.limitSql(dataSource.get(DRIVER), sqlHelper.assembleAggDataSql(config), resultLimit);
         List<String[]> list = new LinkedList<>();
         LOG.info("【{}】", exec);
         try (
@@ -266,7 +251,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 ResultSet rs = stat.executeQuery(exec)
         ) {
             ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
+            int columnCount = metaData.getColumnCount();//有多少字段
             while (rs.next()) {
                 String[] row = new String[columnCount];
                 for (int j = 0; j < columnCount; j++) {
@@ -283,7 +268,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 list.add(row);
             }
         } catch (Exception e) {
-            LOG.error("ERROR:" + e.getMessage());
+            LOG.error("ERROR:{}", e);
             throw new Exception("ERROR:" + e.getMessage(), e);
         }
         return DPCommonUtils.transform2AggResult(config, list);
@@ -310,7 +295,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
             } catch (Exception e) {
                 //  getColumns() and test() methods do not need columnTypes properties,
                 // it doesn't matter for these methods even getMeta failed
-                LOG.warn("getColumnType failed: {}", e.getMessage());
+                LOG.warn("getColumnType failed: {}", ExceptionUtils.getStackTrace(e));
             }
             sqlHelper.getSqlSyntaxHelper().setColumnTypes(columnTypes);
         }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.googlecode.aviator.AviatorEvaluator;
+import org.cboard.cache.CacheManager;
 import org.cboard.dataprovider.aggregator.Aggregatable;
 import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.config.CompositeConfig;
@@ -19,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,14 +29,22 @@ import java.util.stream.Stream;
  * Created by zyong on 2017/1/9.
  */
 public abstract class DataProvider {
+    protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Value("${dataprovider.resultLimit:300000}")
     protected int resultLimit;
+
+    @Value("${cache.expire:600000}")//默认10分钟
+    protected long cacheExpire ;
+
+    @Autowired
+    protected CacheManager cache;//缓存"查询结果数据"
 
     @Autowired
     private AuthenticationService authenticationService;
     @Autowired
     private RoleService roleService;
+
     protected Map<String, String> dataSource;
     protected Map<String, String> query;
 
@@ -43,7 +52,7 @@ public abstract class DataProvider {
     private long interval = 12 * 60 * 60; // second
 
     public static final String NULL_STRING = "#NULL";
-    private static final Logger logger = LoggerFactory.getLogger(DataProvider.class);
+
 
     static {
         AviatorEvaluator.addFunction(new NowFunction());// FIXME ?????
@@ -82,14 +91,14 @@ public abstract class DataProvider {
                 })
                 .sorted(new NaturalOrderComparator()).limit(1000).toArray(String[]::new);
     }
-
+    //FIXME
     public final String[] invokeGetColumn(boolean reload) throws Exception {
         String[] columns = ((Aggregatable) this).getColumn();
         Arrays.sort(columns);
         return columns;
     }
 
-
+    //FIXME
     private void evalValueExpression(AggConfig ac) {
         if (ac == null) {
             return;
@@ -155,11 +164,12 @@ public abstract class DataProvider {
         return result;
     }
 
-    abstract public String[][] getData() throws Exception;
 
-    public void test() throws Exception {
-        getData();
-    }
+    /**
+     * 页面配置完成后，测试功能是否可用
+     */
+    abstract public void test() throws Exception ;
+
 
     public void setDataSource(Map<String, String> dataSource) {
         this.dataSource = dataSource;
@@ -169,13 +179,6 @@ public abstract class DataProvider {
         this.query = query;
     }
 
-    public void setResultLimit(int resultLimit) {
-        this.resultLimit = resultLimit;
-    }
-
-    public int getResultLimit() {
-        return resultLimit;
-    }
 
     public void setInterval(long interval) {
         this.interval = interval;

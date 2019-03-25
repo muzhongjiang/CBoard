@@ -2,6 +2,8 @@ package org.cboard.dataprovider.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cboard.dataprovider.config.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -17,12 +19,14 @@ import static org.cboard.dataprovider.DataProvider.separateNull;
  * Created by zyong on 2017/9/15.
  */
 public class SqlHelper {
+    private static final Logger LOG = LoggerFactory.getLogger(SqlHelper.class);
 
     private String tableName;
     private boolean isSubquery;
     private SqlSyntaxHelper sqlSyntaxHelper = new SqlSyntaxHelper();
 
-    public SqlHelper() {}
+    public SqlHelper() {
+    }
 
     public SqlHelper(String tableName, boolean isSubquery) {
         this.tableName = tableName;
@@ -157,7 +161,7 @@ public class SqlHelper {
                 .boxed()
                 .map(i -> sqlSyntaxHelper.getDimMemberStr(config, i))
                 .collect(Collectors
-                .joining(","));
+                        .joining(","));
         return resultList;
     }
 
@@ -187,9 +191,6 @@ public class SqlHelper {
         return rangeQuery(fieldName, from, to, false, false);
     }
 
-    public static String surround(String text, String quta) {
-        return quta + text + quta;
-    }
 
     private String assembleAggValColumns(Stream<ValueConfig> selectStream) {
         StringJoiner columns = new StringJoiner(", ", "", " ");
@@ -213,4 +214,42 @@ public class SqlHelper {
     public SqlSyntaxHelper getSqlSyntaxHelper() {
         return this.sqlSyntaxHelper;
     }
+
+
+    /**
+     * 添加limit限制
+     */
+    public static String limitSql(String driver, String sql, int resultLimit) {
+
+        //mysql语法:
+        if (driver.contains("mysql")
+                || driver.contains("postgresql")
+                || driver.contains("Hive")
+                || driver.contains("Presto")
+                || driver.contains("ClickHouse")
+                || driver.contains("impala")
+                || driver.contains("kylin")
+        ) {
+            String formatSql = " SELECT * FROM (\n %s \n) t1 LIMIT %d ";
+            return String.format(formatSql, sql, resultLimit);
+        }
+
+        //Oracle:
+        if (driver.contains("Oracle")) {
+            String formatSql = " SELECT * FROM (\n %s \n) t1 ROWNUM <= %d ";
+            return String.format(formatSql, sql, resultLimit);
+        }
+
+        //SQLServer:
+        if (driver.contains("SQLServer")) {
+            String formatSql = " SELECT TOP %d  * FROM (\n %s \n) t1 ";
+            return String.format(formatSql, resultLimit, sql);
+        }
+
+        //没找到对应的driver：
+        LOG.error("未加resultLimit");
+        return sql;
+    }
+
+
 }
