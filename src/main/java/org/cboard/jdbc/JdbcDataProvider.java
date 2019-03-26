@@ -37,12 +37,30 @@ import java.util.concurrent.ConcurrentMap;
 @Scope("prototype")
 public class JdbcDataProvider extends DataProvider implements Aggregatable, Initializing {
 
-
     @DatasourceParameter(label = "{{'DATAPROVIDER.JDBC.DRIVER'|translate}} *",
-            type = DatasourceParameter.Type.Input,
+            type = DatasourceParameter.Type.Select,
+            optionsText = {
+                    "com.mysql.jdbc.Driver",
+                    "org.postgresql.Driver",
+                    "oracle.jdbc.driver.OracleDriver",
+                    "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+                    "com.facebook.presto.jdbc.PrestoDriver",
+                    "org.apache.hive.jdbc.HiveDriver", //hiveserver2
+                    "com.cloudera.impala.jdbc41.Driver"
+            },
+            optionsValue = {
+                    "Mysql",
+                    "Postgresql",
+                    "Oracle",
+                    "SQLServer",
+                    "Presto",
+                    "Hive", //hiveserver2
+                    "Impala"
+            },
             required = true,
             order = 1)
     private String DRIVER = "driver";
+
 
     @DatasourceParameter(label = "{{'DATAPROVIDER.JDBC.JDBCURL'|translate}} *",
             type = DatasourceParameter.Type.Input,

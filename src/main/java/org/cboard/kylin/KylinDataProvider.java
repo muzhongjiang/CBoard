@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 
 /**
- * Created by yfyuan on 2017/3/6.
+ * KylinDataProvider
  */
 @Component("kylin")
 @Scope("prototype")

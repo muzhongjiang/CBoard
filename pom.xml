@@ -20,8 +20,14 @@
 
     <repositories>
         <repository>
-            <id>aliyun</id>
+            <id>nexus-aliyun</id>
+            <name>Nexus aliyun</name>
             <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>odysseusinc</id>
+            <name>odysseusinc</name>
+            <url>http://repo.odysseusinc.com/artifactory/community-libs-release-local</url>
         </repository>
     </repositories>
 
@@ -81,13 +87,6 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
             <version>1.7.4.RELEASE</version>
-        </dependency>
-
-        <!-- cas -->
-        <dependency>
-            <groupId>org.jasig.cas.client</groupId>
-            <artifactId>cas-client-core</artifactId>
-            <version>3.1.12</version>
         </dependency>
 
 
@@ -155,6 +154,11 @@
             <version>4.0</version>
         </dependency>
         <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>12.1.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.47</version>
@@ -192,7 +196,11 @@
             <artifactId>presto-jdbc</artifactId>
             <version>${presto.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cloudera</groupId>
+            <artifactId>ImpalaJDBC41</artifactId>
+            <version>2.6.3</version>
+        </dependency>
 
         <!--tomcat调试：-->
         <dependency>

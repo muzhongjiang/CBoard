@@ -22,7 +22,7 @@ import java.net.URLDecoder;
 import java.util.*;
 
 /**
- * Created by yfyuan on 2016/8/15.
+ * 解析注解生成DataProvider、DataSource模板
  */
 @Component
 public class DataProviderViewManager {
@@ -52,10 +52,13 @@ public class DataProviderViewManager {
         velocityEngine = new VelocityEngine(props);
     }
 
-    private  Map<String, String> rendered = new HashMap<>();
+    private Map<String, String> rendered = new HashMap<>();
 
-    public  List<Map<String, Object>> getQueryParams(String type, String page, Map<String, String> dataSource) {
-        DataProvider  provider= dataProviderManager.getProviderByName(type);
+    /**
+     * "配置数据集"功能：操作html各个组件（TextArea、Input、Select等）生成数据集
+     */
+    public List<Map<String, Object>> getQueryParams(String type, String page, Map<String, String> dataSource) {
+        DataProvider provider = dataProviderManager.getProviderByName(type);
         Set<Field> fieldSet = ReflectionUtils.getAllFields(provider.getClass(), ReflectionUtils.withAnnotation(QueryParameter.class));
         List<Field> fieldList = fieldOrdering.sortedCopy(fieldSet);
         List<Map<String, Object>> params = null;
@@ -81,7 +84,7 @@ public class DataProviderViewManager {
                                 f.set(provider, dataSource);
                             }
                         }
-                        Method method =  provider.getClass().getDeclaredMethod(optionsMethod);
+                        Method method = provider.getClass().getDeclaredMethod(optionsMethod);
                         method.setAccessible(true);
                         param.put("options", method.invoke(provider));
                     }
@@ -112,7 +115,7 @@ public class DataProviderViewManager {
         return params;
     }
 
-    public  String getQueryView(String type, String page, Map<String, String> dataSource) {
+    public String getQueryView(String type, String page, Map<String, String> dataSource) {
         List<Map<String, Object>> params = getQueryParams(type, page, dataSource);
         if (params != null && params.size() > 0) {
             VelocityContext context = new VelocityContext();
@@ -124,8 +127,11 @@ public class DataProviderViewManager {
         return null;
     }
 
-    public  List<Map<String, Object>> getDatasourceParams(String type) {
-        DataProvider  provider= dataProviderManager.getProviderByName(type);
+    /**
+     * "配置数据源"功能：操作html各个组件（TextArea、Input、Select等）生成数据集
+     */
+    public List<Map<String, Object>> getDatasourceParams(String type) {
+        DataProvider provider = dataProviderManager.getProviderByName(type);
         Set<Field> fieldSet = ReflectionUtils.getAllFields(provider.getClass(), ReflectionUtils.withAnnotation(DatasourceParameter.class));
         List<Field> fieldList = fieldOrdering.sortedCopy(fieldSet);
         List<Map<String, Object>> params = null;
@@ -140,9 +146,19 @@ public class DataProviderViewManager {
                 param.put("name", (String) field.get(provider));
                 param.put("placeholder", datasourceParameter.placeholder());
                 param.put("value", datasourceParameter.value());
-                param.put("options", datasourceParameter.options());
                 param.put("checked", datasourceParameter.checked());
                 param.put("required", datasourceParameter.required());
+
+                //
+                String[] optionsValue = datasourceParameter.optionsValue();
+                String[] optionsText = datasourceParameter.optionsText();
+                Map<String, String> options = new HashMap<>();
+                for (int i = 0; i < optionsText.length; i++) {
+                    options.put(optionsValue[i], optionsText[i]);
+                }
+                param.put("options", options);
+                //
+
                 params.add(param);
             }
         } catch (Exception e) {
@@ -151,19 +167,25 @@ public class DataProviderViewManager {
         return params;
     }
 
-    public  String getDatasourceView(String type) {
+    /**
+     * 使用velocity模板生成Datasource html
+     */
+    public String getDatasourceView(String type) {
         List<Map<String, Object>> params = getDatasourceParams(type);
         if (params != null && params.size() > 0) {
             VelocityContext context = new VelocityContext();
             context.put("params", params);
             StringBuilderWriter stringBuilderWriter = new StringBuilderWriter();
             velocityEngine.mergeTemplate("datasource.vm", "utf-8", context, stringBuilderWriter);
-            return stringBuilderWriter.toString();
+            String result = stringBuilderWriter.toString();
+            LOG.info(result);
+            return result;
         }
         return null;
     }
 
-    private  Ordering<Field> fieldOrdering = Ordering.from(new Comparator<Field>() {
+
+    private Ordering<Field> fieldOrdering = Ordering.from(new Comparator<Field>() {
         @Override
         public int compare(Field o1, Field o2) {
             return Integer.compare(getOrder(o1), getOrder(o2));

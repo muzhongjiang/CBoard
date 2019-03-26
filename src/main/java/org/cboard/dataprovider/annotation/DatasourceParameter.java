@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
  * Created by yfyuan on 2016/8/18.
  */
@@ -17,14 +18,15 @@ public @interface DatasourceParameter {
     // Input type
     Type type();
 
-    int order() default 0;
+    int order() default 0;//html组件从上到下顺序
 
     // Init value
     String value() default "";
 
     String placeholder() default "";
 
-    String[] options() default "N/A";
+    String[] optionsText()  default "";//下拉框的text
+    String[] optionsValue()  default "";//下拉框的value
 
     boolean checked() default false;
 

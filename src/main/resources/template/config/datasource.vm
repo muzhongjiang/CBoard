@@ -11,8 +11,8 @@
         <input ng-model="curDatasource.config.$param.name" type="checkbox"/>
     #elseif ($param.type == "select")
         <select class="form-control" ng-model="curDatasource.config.$param.name">
-            #foreach($option in $param.options)
-                <option>$option</option>
+            #foreach($entry in $param.options.entrySet())
+                 <option value ="$!{entry.value}">$!{entry.key}</option>
             #end
         </select>
     #end

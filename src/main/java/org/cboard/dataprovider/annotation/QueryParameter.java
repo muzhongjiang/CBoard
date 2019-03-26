@@ -23,9 +23,7 @@ public @interface QueryParameter {
     String placeholder() default "";
 
     String[] options() default "N/A";
-
-    // 获取options数组的方法名称
-    String optionsMethod() default "";
+    String optionsMethod() default ""; // 获取options数组的方法名称
 
     boolean checked() default false;
 
