@@ -322,7 +322,7 @@ cBoard.controller('widgetCtrl', function ($scope, $state, $stateParams, $http, $
                 var curDS = _.find($scope.datasetList, function (ds) {
                     return ds.id == $scope.curWidget.datasetId;
                 });
-                return curDS ? curDS.name : null;
+                return curDS ? curDS.categoryName+"/"+curDS.name : null;
             }
         }
 

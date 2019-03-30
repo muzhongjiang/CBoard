@@ -10,7 +10,7 @@
 // * ImpalaDataProvider
 // *
 // */
-//@Component("kylin")
+//@Component("impala")
 //@Scope("prototype")
 //public class ImpalaDataProvider  extends DataProvider implements Aggregatable, Initializing {
 //

@@ -42,6 +42,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
             optionsText = {
                     "com.mysql.jdbc.Driver",
                     "org.postgresql.Driver",
+                    "com.pivotal.jdbc.GreenplumDriver",
                     "oracle.jdbc.driver.OracleDriver",
                     "com.microsoft.sqlserver.jdbc.SQLServerDriver",
                     "com.facebook.presto.jdbc.PrestoDriver",
@@ -51,6 +52,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
             optionsValue = {
                     "Mysql",
                     "Postgresql",
+                    "Greenplum",
                     "Oracle",
                     "SQLServer",
                     "Presto",

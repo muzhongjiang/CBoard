@@ -35,7 +35,7 @@ public abstract class DataProvider {
     protected int resultLimit;
 
     @Value("${cache.expire:600000}")//默认10分钟
-    protected long cacheExpire ;
+    protected long cacheExpire;
 
     @Autowired
     protected CacheManager cache;//缓存"查询结果数据"
@@ -61,8 +61,6 @@ public abstract class DataProvider {
 
     /**
      * 通过用户的小部件设计器获取聚合数据
-     *
-     * @return
      */
     public final AggregateResult getAggData(AggConfig ac, boolean reload) throws Exception {
         evalValueExpression(ac);
@@ -91,7 +89,8 @@ public abstract class DataProvider {
                 })
                 .sorted(new NaturalOrderComparator()).limit(1000).toArray(String[]::new);
     }
-    //FIXME
+
+    //FIXME reload 没使用？？
     public final String[] invokeGetColumn(boolean reload) throws Exception {
         String[] columns = ((Aggregatable) this).getColumn();
         Arrays.sort(columns);
@@ -119,6 +118,9 @@ public abstract class DataProvider {
         }
     }
 
+    /**
+     * Dashboard传参
+     */
     private Stream<String> getFilterValue(String value) {
         List<String> list = new ArrayList<>();
         if (value == null || !(value.startsWith("{") && value.endsWith("}"))) {
@@ -130,7 +132,7 @@ public abstract class DataProvider {
         } else if ("{userRoles}".equals(value)) {
             List<DashboardRole> roles = roleService.getCurrentRoleList();
             roles.forEach(role -> list.add(role.getRoleName()));
-        } else {
+        } else {//FIXME 作用？
             list.add(AviatorEvaluator.compile(value.substring(1, value.length() - 1), true).execute().toString());
         }
         return list.stream();
@@ -142,6 +144,7 @@ public abstract class DataProvider {
         return Hashing.md5().newHasher().putString(dataSourceStr + queryStr, Charsets.UTF_8).hash().toString();
     }
 
+    //FIXME
     public List<DimensionConfig> filterCCList2DCList(List<ConfigComponent> filters) {
         List<DimensionConfig> result = new LinkedList<>();
         filters.stream().forEach(cc -> {
@@ -168,7 +171,7 @@ public abstract class DataProvider {
     /**
      * 页面配置完成后，测试功能是否可用
      */
-    abstract public void test() throws Exception ;
+    abstract public void test() throws Exception;
 
 
     public void setDataSource(Map<String, String> dataSource) {

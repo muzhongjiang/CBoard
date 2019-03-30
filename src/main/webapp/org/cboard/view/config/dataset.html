@@ -72,6 +72,7 @@
                                     <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-2 col-md-3">
                                             <div class="btn-group">
+                                                <!--FIXME 读取数据时应该加一个sqllab 100条（后端可配置）数据预览功能-->
                                                 <button type="button" class="btn btn-success" ng-click="loadData()">{{'CONFIG.DATASET.LOAD_DATA'|translate}}</button>
                                                 <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                                     <span class="caret"></span>
@@ -92,6 +93,7 @@
                                             {{'CONFIG.DATASET.REAL_TIME_INTERVAL'|translate}}
                                         </label>
                                         <div class="col-sm-10">
+                                            <!--FIXME 这里的interval作用是？-->
                                             <input ng-model="curDataset.data.interval" class="form-control" placeholder="{{'CONFIG.DATASET.REAL_TIME_TIP'|translate}}"/>
                                         </div>
                                     </div>
@@ -232,7 +234,7 @@
                 <div class="box-footer">
                     <button type="submit" class="btn btn-danger pull-right">{{'COMMON.CANCEL'|translate}}</button>
                     <button type="submit" ng-click="save()" class="btn btn-success pull-right"
-                            style="margin-right: 5px">{{'COMMON.SAVE'|translate}}
+                            style="margin-right: 5px">{{'COMMON.SAVE'|translate}}     <!--FIXME 保存前数据验证-->
                     </button>
                     <div class="row">
                         <div class="col-md-12">

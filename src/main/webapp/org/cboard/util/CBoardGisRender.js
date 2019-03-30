@@ -30,7 +30,6 @@ CBoardGisRender.prototype.do = function (tall, persist) {
         drill: this.drill,
         render: render
     };
-    console.log(args);
     threeLevelMap.container = this.container;
     threeLevelMap.map(args);
     $(this.jqContainer).css({

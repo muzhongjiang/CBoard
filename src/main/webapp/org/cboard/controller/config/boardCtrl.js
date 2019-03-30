@@ -9,6 +9,7 @@ cBoard.controller('boardCtrl',
 
         $scope.optFlag = 'none';
         $scope.curBoard = {layout: {rows: []}};
+
         $scope.alerts = [];
         $scope.verify = {boardName: true};
         $rootScope.freeLayout = false;
@@ -23,7 +24,7 @@ cBoard.controller('boardCtrl',
                 $scope.boardList = response;
                 originalData = jstree_CvtVPath2TreeData(
                     $scope.boardList.map(function (ds) {
-                        var categoryName = ds.categoryName == null ? translate('CONFIG.DASHBOARD.MY_DASHBOARD') : ds.categoryName;
+                        let categoryName = ds.categoryName == null ? translate('CONFIG.DASHBOARD.MY_DASHBOARD') : ds.categoryName;
                         return {
                             "id": ds.id,
                             "name": ds.name,
@@ -35,9 +36,10 @@ cBoard.controller('boardCtrl',
             });
         };
 
-        var getCategoryList = function () {
+        let getCategoryList = function () {
             $http.get("dashboard/getCategoryList.do").success(function (response) {
                 $scope.categoryList = [{id: null, name: translate('CONFIG.DASHBOARD.MY_DASHBOARD')}];
+                console.log($scope.curBoard.categoryId);
                 _.each(response, function (o) {
                     $scope.categoryList.push(o);
                 });
@@ -145,7 +147,7 @@ cBoard.controller('boardCtrl',
         $scope.newGridLayout = function () {
             $rootScope.freeLayout = false;
             $scope.optFlag = 'new';
-            $scope.curBoard = {layout: {rows: []}};
+            $scope.curBoard = {layout: {rows: []},categoryId:null};
             $('div.newBoard').addClass('hideOperate');
         };
 

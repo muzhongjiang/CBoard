@@ -29,7 +29,6 @@ cBoard.controller('renderCtrl', function ($timeout, $rootScope, $scope, $state, 
     };
 
     $scope.$watch('l', function (newValue) {
-        console.log(newValue);
         if (newValue == 0) {
             $timeout(function () {
                 runTask();

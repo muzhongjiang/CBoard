@@ -1,7 +1,6 @@
 package org.cboard.services;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import org.cboard.dao.DatasourceDao;
 import org.cboard.dataprovider.DataProviderManager;
 import org.cboard.dataprovider.annotation.DatasourceParameter;
@@ -11,7 +10,6 @@ import org.cboard.services.role.RolePermission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -19,7 +17,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 

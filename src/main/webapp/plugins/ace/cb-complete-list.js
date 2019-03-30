@@ -1,5 +1,6 @@
 /**
  * Created by zyong on 2017/4/13.
+ * FIXME 使用ES 源时再出来，使用jdbc时别出来
  */
 var cbAcebaseOption = {
     require: ['ace/ext/language_tools'],

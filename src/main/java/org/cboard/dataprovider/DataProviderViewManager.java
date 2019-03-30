@@ -152,7 +152,7 @@ public class DataProviderViewManager {
                 //
                 String[] optionsValue = datasourceParameter.optionsValue();
                 String[] optionsText = datasourceParameter.optionsText();
-                Map<String, String> options = new HashMap<>();
+                Map<String, String> options = new LinkedHashMap<>();//有序
                 for (int i = 0; i < optionsText.length; i++) {
                     options.put(optionsValue[i], optionsText[i]);
                 }

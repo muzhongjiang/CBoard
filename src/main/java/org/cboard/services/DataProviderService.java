@@ -74,6 +74,14 @@ public class DataProviderService {
         }
     }
 
+    /**
+     * 配置"数据集（cube）"时获取"查询语句"返回的columns
+     *
+     * @param datasourceId 数据源Id
+     * @param query  数据集对应的sql
+     * @param datasetId
+     * @param reload 等于false时走缓存
+     */
     public DataProviderResult getColumns(Long datasourceId, Map<String, String> query, Long datasetId, boolean reload) {
         DataProviderResult dps = new DataProviderResult();
         try {

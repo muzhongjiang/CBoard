@@ -236,6 +236,9 @@ public class DashboardController extends BaseController {
         return widgetDao.getCategoryList();
     }
 
+    /**
+     * 保存新增DataSet
+     */
     @RequestMapping(value = "/saveNewDataset")
     public ServiceStatus saveNewDataset(@RequestParam(name = "json") String json) {
         return datasetService.save(tlUser.get().getUserId(), json);
@@ -253,6 +256,9 @@ public class DashboardController extends BaseController {
         return Lists.transform(list, ViewDashboardDataset.TO);
     }
 
+    /**
+     * 修改DataSet
+     */
     @RequestMapping(value = "/updateDataset")
     public ServiceStatus updateDataset(@RequestParam(name = "json") String json) {
         return datasetService.update(tlUser.get().getUserId(), json);

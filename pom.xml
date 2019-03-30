@@ -29,6 +29,11 @@
             <name>odysseusinc</name>
             <url>http://repo.odysseusinc.com/artifactory/community-libs-release-local</url>
         </repository>
+        <repository>
+            <id>hand-china</id>
+            <name>hand-china</name>
+            <url>http://nexus.saas.hand-china.com/content/repositories/rdc</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -132,11 +137,6 @@
 
         <!--日志：-->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
@@ -163,10 +163,16 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.47</version>
         </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.4.1212</version>
+            <version>42.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pivotal</groupId>
+            <artifactId>greenplum-jdbc</artifactId>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kylin</groupId>

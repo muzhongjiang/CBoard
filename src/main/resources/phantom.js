@@ -5,14 +5,12 @@ function waitFor(testFx, onReady, timeOutMillis) {
         condition = false,
         interval = setInterval(function () {
             var elapsedTime = new Date().getTime() - start;
-            console.log("elapsedTime:" + elapsedTime + ", [" + maxtimeOutMillis + "]");
             if ((elapsedTime < maxtimeOutMillis) && !condition) {
                 // If not time-out yet and condition not yet fulfilled
                 condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
             } else {
                 if (!condition) {
                     // If condition still not fulfilled (timeout but condition is 'false')
-                    console.log("'waitFor()' timeout");
                     phantom.exit(1);
                 } else {
                     // Condition fulfilled (timeout and/or condition is 'true')
