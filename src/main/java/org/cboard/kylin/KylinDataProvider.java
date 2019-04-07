@@ -207,7 +207,7 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
 
     @Override
     public String viewAggDataQuery(AggConfig config) throws Exception {
-        return sqlHelper.assembleAggDataSql(config);
+        return SqlHelper.limitSql(driver, sqlHelper.assembleAggDataSql(config), resultLimit);
     }
 
     @Override

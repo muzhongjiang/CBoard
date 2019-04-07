@@ -3,14 +3,14 @@ package org.cboard.dataprovider.config;
 import java.util.List;
 
 /**
- * 维度定义列，包括列名，过滤条件（类型，值），重命名；
+ * （对应"数据集管理"页面）维度定义列，包括列名，过滤条件（类型，值），重命名；
  */
 public class DimensionConfig extends ConfigComponent {
     private String columnName;
     private String filterType;
     private List<String> values;
     private String id;
-    private String custom;
+    private String custom; //FIXME 作用？
 
     public String getColumnName() {
         return columnName;

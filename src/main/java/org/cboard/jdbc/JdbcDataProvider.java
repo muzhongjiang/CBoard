@@ -297,7 +297,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
 
     @Override
     public String viewAggDataQuery(AggConfig config) throws Exception {
-        return sqlHelper.assembleAggDataSql(config);
+        return SqlHelper.limitSql(dataSource.get(DRIVER), sqlHelper.assembleAggDataSql(config), resultLimit);
     }
 
 

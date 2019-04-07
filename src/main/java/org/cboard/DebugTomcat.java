@@ -1,12 +1,11 @@
 package org.cboard;
 
-import java.io.File;
-
 import org.apache.catalina.Context;
-import org.apache.catalina.core.AprLifecycleListener;
-import org.apache.catalina.core.StandardServer;
-import org.apache.catalina.deploy.ErrorPage;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.ErrorPage;
+
+import java.io.File;
 
 /**
  * Created by zhongjian on 11/17/16.
@@ -22,13 +21,13 @@ public class DebugTomcat {
 
         String webBase = new File("src/main/webapp").getAbsolutePath();
         Tomcat tomcat = new Tomcat();
-        tomcat.setPort(port);
+//        tomcat.setPort(port);
         tomcat.setBaseDir(".");
 
-        // Add AprLifecycleListener
-        StandardServer server = (StandardServer) tomcat.getServer();
-        AprLifecycleListener listener = new AprLifecycleListener();
-        server.addLifecycleListener(listener);
+        // Add AprLifecycleListener（默认AprLifecycleListener）
+//        StandardServer server = (StandardServer) tomcat.getServer();
+//        AprLifecycleListener listener = new AprLifecycleListener();
+//        server.addLifecycleListener(listener);
 
         Context webContext = tomcat.addWebapp("/", webBase);
         ErrorPage notFound = new ErrorPage();
@@ -37,7 +36,13 @@ public class DebugTomcat {
         webContext.addErrorPage(notFound);
         webContext.addWelcomeFile("main.html");
 
+        //配置Connector：
+        Connector httpConnector = new Connector("org.apache.coyote.http11.Http11Nio2Protocol");
+        httpConnector.setPort(port);
+        tomcat.getService().addConnector(httpConnector);
+
         // tomcat start
+        tomcat.getConnector();//Tomcat9特有：触发创建默认的connector
         tomcat.start();
         tomcat.getServer().await();
     }

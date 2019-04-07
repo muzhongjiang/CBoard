@@ -78,9 +78,9 @@ public class DataProviderService {
      * 配置"数据集（cube）"时获取"查询语句"返回的columns
      *
      * @param datasourceId 数据源Id
-     * @param query  数据集对应的sql
+     * @param query        数据集对应的sql
      * @param datasetId
-     * @param reload 等于false时走缓存
+     * @param reload       等于false时走缓存
      */
     public DataProviderResult getColumns(Long datasourceId, Map<String, String> query, Long datasetId, boolean reload) {
         DataProviderResult dps = new DataProviderResult();
@@ -110,6 +110,9 @@ public class DataProviderService {
         return null;
     }
 
+    /**
+     * '预览查询'即：显示sql
+     */
     public String viewAggDataQuery(Long datasourceId, Map<String, String> query, Long datasetId, AggConfig config) {
         try {
             Dataset dataset = getDataset(datasetId);
@@ -136,15 +139,18 @@ public class DataProviderService {
         }
     }
 
-
+    /**
+     * 拼接数据集（cube）自定义配置
+     */
     private void attachCustom(Dataset dataset, AggConfig aggConfig) {
         if (dataset == null || aggConfig == null) {
             return;
         }
+        //?
         Consumer<DimensionConfig> predicate = (config) -> {
             if (StringUtils.isNotEmpty(config.getId())) {
                 String custom = (String) JSONPath.eval(dataset.getSchema(), "$.dimension[id='" + config.getId() + "'][0].custom");
-                if (custom == null) {
+                if (custom == null) {// type='level' 是"层级"功能
                     custom = (String) JSONPath.eval(dataset.getSchema(), "$.dimension[type='level'].columns[id='" + config.getId() + "'][0].custom");
                 }
                 config.setCustom(custom);

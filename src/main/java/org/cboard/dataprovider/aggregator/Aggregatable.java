@@ -33,7 +33,7 @@ public interface Aggregatable {
 
 
     /**
-     * 查看查询（比如：加了聚合列之后的SQL）
+     * '预览查询'即：显示最终的sql
      */
     default String viewAggDataQuery(AggConfig ac) throws Exception {
         return "Not Support";

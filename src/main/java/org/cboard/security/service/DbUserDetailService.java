@@ -16,6 +16,9 @@ import java.util.List;
  */
 public class DbUserDetailService extends JdbcDaoImpl {
 
+    /**
+     * 认证，并返回用户和对应权限
+     */
     protected List<UserDetails> loadUsersByUsername(final String username) {
         return this.getJdbcTemplate().query(super.getUsersByUsernameQuery(), new String[]{username}, new RowMapper() {
             public UserDetails mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -24,7 +27,15 @@ public class DbUserDetailService extends JdbcDaoImpl {
                 String loginname = rs.getString(3);
                 String password = rs.getString(4);
                 boolean enabled = rs.getBoolean(5);
-                User user = new User(loginname, password, enabled, true, true, true, AuthorityUtils.NO_AUTHORITIES);
+                User user = new User(
+                        loginname,
+                        password,
+                        enabled,
+                        true,
+                        true,
+                        true,
+                        AuthorityUtils.NO_AUTHORITIES//权限
+                );
                 user.setUserId(userId);
                 user.setName(username);
                 return user;

@@ -9,13 +9,13 @@ cBoard.controller('categoryCtrl', function ($scope, $http, ModalUtils, $filter) 
     $scope.alerts = [];
     $scope.verify = {categoryName:true};
 
-    var getCategoryList = function () {
+    let getCategoryList = function () {
         $http.get("dashboard/getCategoryList.do").success(function (response) {
             $scope.categoryList = response;
         });
     };
 
-    var categoryChange = function () {
+    let categoryChange = function () {
         $scope.verify = {categoryName:true};
         $scope.$emit("categoryChange");
     };
@@ -31,6 +31,7 @@ cBoard.controller('categoryCtrl', function ($scope, $http, ModalUtils, $filter) 
         $scope.curCategory = angular.copy(ds);
     };
     $scope.deleteBordCategory = function (ds) {
+        //FIXME  删除前如果当前看板"分类"下有"看板"存在应该提示！！！
         ModalUtils.confirm(translate("COMMON.CONFIRM_DELETE"), "modal-warning", "lg", function () {
             $http.post("dashboard/deleteCategory.do", {id: ds.id}).success(function () {
                 $scope.optFlag = 'none';
@@ -40,7 +41,7 @@ cBoard.controller('categoryCtrl', function ($scope, $http, ModalUtils, $filter) 
         });
     };
 
-    var validate = function () {
+    let validate = function () {
         $scope.alerts = [];
         if(!$scope.curCategory.name){
             $scope.alerts = [{msg: translate('CONFIG.CATEGORY.NAME')+translate('COMMON.NOT_EMPTY'), type: 'danger'}];
@@ -48,7 +49,7 @@ cBoard.controller('categoryCtrl', function ($scope, $http, ModalUtils, $filter) 
             $("#CategoryName").focus();
             return false;
         }
-        return true;
+        return true;jstree
     }
 
     $scope.save = function () {

@@ -74,12 +74,6 @@
                 <li ui-sref-active="active" ng-if="isShowMenu('config.board')">
                     <a ui-sref="config.board"><i class="fa fa-puzzle-piece"></i>{{'SIDEBAR.DASHBOARD'|translate}}</a>
                 </li>
-                <li ui-sref-active="active" ng-if="isShowMenu('config.job')">
-                    <a ui-sref="config.job"><i class="fa fa-clock-o"></i>{{'SIDEBAR.JOB'|translate}}</a>
-                </li>
-                <li ui-sref-active="active" ng-if="isShowMenu('config.role')">
-                    <a ui-sref="config.role"><i class="fa fa-share-alt"></i>{{'SIDEBAR.SHARE_RESOURCE'|translate}}</a>
-                </li>
             </ul>
         </li>
         <!-- Admin -->
@@ -97,6 +91,12 @@
                 </li>
                 <li ui-sref-active="active" ng-if="isShowMenu('config.homepage')">
                     <a ui-sref="config.homepage"><i class="fa fa-star"></i>{{'SIDEBAR.HOMEPAGE'|translate}}</a>
+                </li>
+                <li ui-sref-active="active" ng-if="isShowMenu('config.role')">
+                    <a ui-sref="config.role"><i class="fa fa-share-alt"></i>{{'SIDEBAR.SHARE_RESOURCE'|translate}}</a>
+                </li>
+                <li ui-sref-active="active" ng-if="isShowMenu('config.job')">
+                    <a ui-sref="config.job"><i class="fa fa-clock-o"></i>{{'SIDEBAR.JOB'|translate}}</a>
                 </li>
                 <li>
                     <a href="https://www.baidu.com"><i class="fa fa-star"></i>操作日志</a>

@@ -24,7 +24,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +37,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -307,9 +313,9 @@ public class DashboardController extends BaseController {
      * 配置"数据集（cube）"时获取"查询语句"返回的columns
      *
      * @param datasourceId 数据源Id
-     * @param query  数据集对应的sql
+     * @param query        数据集对应的sql
      * @param datasetId
-     * @param reload 等于false时走缓存
+     * @param reload       等于false时走缓存
      */
     @RequestMapping(value = "/getColumns")
     public DataProviderResult getColumns(@RequestParam(name = "datasourceId", required = false) Long datasourceId,
@@ -324,6 +330,9 @@ public class DashboardController extends BaseController {
         return dataProviderService.getColumns(datasourceId, strParams, datasetId, reload);
     }
 
+    /**
+     * "预览" 或 查询
+     */
     @RequestMapping(value = "/getAggregateData")
     public AggregateResult getAggregateData(@RequestParam(name = "datasourceId", required = false) Long datasourceId,
                                             @RequestParam(name = "query", required = false) String query,
@@ -349,6 +358,9 @@ public class DashboardController extends BaseController {
         return aggResult;
     }
 
+    /**
+     * '预览查询'即：显示最终的sql
+     */
     @RequestMapping(value = "/viewAggDataQuery")
     public String[] viewAggDataQuery(@RequestParam(name = "datasourceId", required = false) Long datasourceId,
                                      @RequestParam(name = "query", required = false) String query,
@@ -360,7 +372,9 @@ public class DashboardController extends BaseController {
             strParams = Maps.transformValues(queryO, Functions.toStringFunction());
         }
         AggConfig config = ViewAggConfig.getAggConfig(JSONObject.parseObject(cfg, ViewAggConfig.class));
-        return new String[]{dataProviderService.viewAggDataQuery(datasourceId, strParams, datasetId, config)};
+        String[] result=new String[]{dataProviderService.viewAggDataQuery(datasourceId, strParams, datasetId, config)};
+        LOG.debug("预览查询，sql:[{}]",result);
+        return result;
     }
 
     @RequestMapping(value = "/dashboardWidget")
@@ -473,7 +487,7 @@ public class DashboardController extends BaseController {
 
     private String imgPath(HttpServletRequest request) {
         String templateDir = request.getSession().getServletContext().getRealPath("/");
-        templateDir = templateDir.replace("\\","/");
+        templateDir = templateDir.replace("\\", "/");
         templateDir = templateDir + "imgs/cockpit";
         return templateDir;
     }

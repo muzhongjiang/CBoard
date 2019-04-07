@@ -52,7 +52,8 @@ public class HomepageController extends BaseController {
         String userId = tlUser.get().getUserId();
         return homepageService.selectHomepage(userId);
     }
-    
+
+
     @RequestMapping(value = "/mine", method = RequestMethod.GET)
     public Map<String, Object> loginPage() {
         String userId = tlUser.get().getUserId();

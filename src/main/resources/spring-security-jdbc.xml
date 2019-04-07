@@ -17,8 +17,11 @@
         <security:intercept-url pattern="/fonts/**" access="permitAll"/>
         <security:intercept-url pattern="/imgs/**" access="permitAll"/>
         <security:intercept-url pattern="/**" access="!anonymous"/>
-        <security:form-login login-page="/login.do" username-parameter="username" password-parameter="password"
-                             default-target-url="/starter.html" always-use-default-target="true"/>
+        <security:form-login login-page="/login.do"
+                             username-parameter="username"
+                             password-parameter="password"
+                             default-target-url="/starter.html"
+                             always-use-default-target="true"/>
         <security:logout logout-url="/j_spring_cas_security_logout"/>
         <security:remember-me remember-me-parameter="remember_me"/>
         <security:csrf disabled="true"/>
@@ -44,8 +47,7 @@
 
     <bean id="userDetailsService"
           class="org.cboard.security.service.DbUserDetailService">
-        <property name="dataSource" ref="dataSource">
-        </property>
+        <property name="dataSource" ref="dataSource"></property>
         <property name="authoritiesByUsernameQuery">
             <value>
                 <![CDATA[SELECT login_name username, 'admin' AS authority
