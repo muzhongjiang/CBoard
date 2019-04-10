@@ -373,7 +373,6 @@ public class DashboardController extends BaseController {
         }
         AggConfig config = ViewAggConfig.getAggConfig(JSONObject.parseObject(cfg, ViewAggConfig.class));
         String[] result=new String[]{dataProviderService.viewAggDataQuery(datasourceId, strParams, datasetId, config)};
-        LOG.debug("预览查询，sql:[{}]",result);
         return result;
     }
 

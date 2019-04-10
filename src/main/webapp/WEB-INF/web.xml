@@ -3,7 +3,9 @@
          xmlns="http://java.sun.com/xml/ns/javaee"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          id="WebApp_ID" version="3.0">
-    <display-name>zhibing_mybatis</display-name>
+    <display-name>BI</display-name>
+
+
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
@@ -11,11 +13,14 @@
             classpath:spring-datasource.xml,classpath:spring.xml,classpath:spring-mvc.xml,classpath:spring-mybatis.xml,classpath:spring-security.xml,
         </param-value>
     </context-param>
+    <listener>
+        <description>spring listener</description>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
 
 
 
-
-
+    <!--跨域：-->
     <filter>
         <filter-name>cors</filter-name>
         <filter-class>org.cboard.filter.CORSFilter</filter-class>
@@ -25,6 +30,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!--编码：-->
     <filter>
         <filter-name>encodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -37,7 +43,6 @@
         <filter-name>encodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
 
 
     <servlet>
@@ -69,8 +74,7 @@
         <filter-name>LocalSecurityFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
-    <!--   DelegatingFilterProxy 是一个 SpringFramework 的类，它可以代理一个 applicationcontext 中定义的 Springbean 所实现的 filter -->
+    <!--DelegatingFilterProxy可以代理一个 applicationcontext 中定义的 Spring bean 所实现的 filter -->
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -80,10 +84,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <listener>
-        <description>spring listener</description>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
+
 
     <!--druid监控：-->
     <servlet>
@@ -105,7 +106,7 @@
 
 
     <session-config>
-        <session-timeout>60</session-timeout>
+        <session-timeout>10</session-timeout>
     </session-config>
 
     <welcome-file-list>

@@ -1,5 +1,8 @@
 package org.cboard.dataprovider.util;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.cboard.dataprovider.config.*;
 import org.slf4j.Logger;
@@ -45,12 +48,15 @@ public class SqlHelper {
         return whereStr;
     }
 
+    /**
+     * 将图表设计"过滤"功能转为sql的where条件
+     */
     public String assembleFilterSql(Stream<ConfigComponent> filters) {
         return filterSql(filters, "WHERE");
     }
 
     /**
-     * 创建图表时，根据'列维'，'行维(group by)'，'过滤(where)'，'指标' 拼接sql
+     * 创建图表时，根据'列维'，'行维'，'过滤(where)'，'指标'+数据集属性 拼接sql
      */
     public String assembleAggDataSql(AggConfig config) throws Exception {
         Stream<DimensionConfig> c = config.getColumns().stream();
@@ -89,6 +95,16 @@ public class SqlHelper {
                 .map(e -> configComponentToSql(e))
                 .filter(e -> e != null)
                 .forEach(where::add);
+
+
+        //============
+//        Object[] arr=filterStream.toArray();
+//        for (int i = 0; i < arr.length; i++) {
+//            ConfigComponent cc=(ConfigComponent)arr[i];
+//            System.err.println(cc);
+//
+//        }
+
         return where.toString();
     }
 
@@ -230,19 +246,19 @@ public class SqlHelper {
                 || driver.contains("impala")
                 || driver.contains("kylin")
         ) {
-            String formatSql = " SELECT * FROM (\n %s \n) t1 LIMIT %d ";
+            String formatSql = "\n SELECT * FROM (\n %s \n) t1 LIMIT %d ";
             return String.format(formatSql, sql, resultLimit);
         }
 
         //Oracle:
         if (driver.contains("Oracle")) {
-            String formatSql = " SELECT * FROM (\n %s \n) t1 ROWNUM <= %d ";
+            String formatSql = "\n SELECT * FROM (\n %s \n) t1 ROWNUM <= %d ";  //FIXME 换行符要根据系统确定
             return String.format(formatSql, sql, resultLimit);
         }
 
         //SQLServer:
         if (driver.contains("SQLServer")) {
-            String formatSql = " SELECT TOP %d  * FROM (\n %s \n) t1 ";
+            String formatSql = "\n SELECT TOP %d  * FROM (\n %s \n) t1 ";
             return String.format(formatSql, resultLimit, sql);
         }
 

@@ -100,3 +100,4 @@ hs_err_pid*
 **/CElasticsearchDataProvider.java
 mycache
 src/test/java/Test.java
+assets/dist
