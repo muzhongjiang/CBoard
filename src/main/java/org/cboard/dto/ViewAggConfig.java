@@ -1,5 +1,8 @@
 package org.cboard.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.cboard.dataprovider.config.AggConfig;
 import org.cboard.dataprovider.config.ConfigComponent;
 import org.cboard.dataprovider.config.DimensionConfig;
@@ -12,6 +15,9 @@ import java.util.stream.Collectors;
 /**
  * Created by yfyuan on 2017/4/27.
  */
+@Getter
+@Setter
+@ToString
 public class ViewAggConfig {
 
     private List<DimensionConfig> rows;
@@ -35,35 +41,5 @@ public class ViewAggConfig {
         return null;
     }
 
-    public List<DimensionConfig> getRows() {
-        return rows;
-    }
 
-    public void setRows(List<DimensionConfig> rows) {
-        this.rows = rows;
-    }
-
-    public List<DimensionConfig> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(List<DimensionConfig> columns) {
-        this.columns = columns;
-    }
-
-    public List<DimensionConfig> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(List<DimensionConfig> filters) {
-        this.filters = filters;
-    }
-
-    public List<ValueConfig> getValues() {
-        return values;
-    }
-
-    public void setValues(List<ValueConfig> values) {
-        this.values = values;
-    }
 }

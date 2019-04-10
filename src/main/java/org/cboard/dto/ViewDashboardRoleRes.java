@@ -1,11 +1,17 @@
 package org.cboard.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.cboard.pojo.DashboardRoleRes;
 import org.cboard.services.role.RolePermission;
 
 /**
  * Created by yfyuan on 2017/3/14.
  */
+@Getter
+@Setter
+@ToString
 public class ViewDashboardRoleRes {
 
     private Long roleResId;
@@ -25,51 +31,5 @@ public class ViewDashboardRoleRes {
         this.delete = RolePermission.isDelete(dashboardRoleRes.getPermission());
     }
 
-    public boolean isEdit() {
-        return edit;
-    }
 
-    public void setEdit(boolean edit) {
-        this.edit = edit;
-    }
-
-    public boolean isDelete() {
-        return delete;
-    }
-
-    public void setDelete(boolean delete) {
-        this.delete = delete;
-    }
-
-    public Long getRoleResId() {
-        return roleResId;
-    }
-
-    public void setRoleResId(Long roleResId) {
-        this.roleResId = roleResId;
-    }
-
-    public String getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
-    }
-
-    public Long getResId() {
-        return resId;
-    }
-
-    public void setResId(Long resId) {
-        this.resId = resId;
-    }
-
-    public String getResType() {
-        return resType;
-    }
-
-    public void setResType(String resType) {
-        this.resType = resType;
-    }
 }
