@@ -2,9 +2,7 @@ package org.cboard.services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
-import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cboard.dao.*;
 import org.cboard.pojo.*;
@@ -48,7 +46,7 @@ public class AdminSerivce {
     private BoardDao boardDao;
 
     public String addUser(String userId, String loginName, String userName, String userPassword) {
-        String md5 = Hashing.md5().newHasher().putString(userPassword, Charsets.UTF_8).hash().toString();
+        String md5 = DigestUtils.md5Hex(userPassword);
         DashboardUser user = new DashboardUser();
         user.setLoginName(loginName);
         user.setUserId(userId);
@@ -64,7 +62,7 @@ public class AdminSerivce {
         user.setUserId(userId);
         user.setUserName(userName);
         if (StringUtils.isNotBlank(userPassword)) {
-            String md5 = Hashing.md5().newHasher().putString(userPassword, Charsets.UTF_8).hash().toString();
+            String md5 = DigestUtils.md5Hex(userPassword);
             user.setUserPassword(md5);
         }
         userDao.update(user);
@@ -74,7 +72,7 @@ public class AdminSerivce {
     @Transactional
     public String deleteUser(String userId) {
         userDao.deleteUserById(userId);
-        Map param = new HashMap<String,String>();
+        Map<String, Object> param = new HashMap<>();
         param.put("objUid", userId);
         userDao.deleteUserRole(param);
         return "1";
@@ -109,7 +107,7 @@ public class AdminSerivce {
     public String updateUserRole(String[] userId, String[] roleId, final String curUid) {
 
         for (String uid : userId) {
-            Map<String, Object> params = new HashedMap();
+            Map<String, Object> params = new HashMap<>();
             params.put("objUid", uid);
             params.put("curUid", curUid);
             params.put("adminUid", adminUid);
@@ -130,7 +128,7 @@ public class AdminSerivce {
 
     public String deleteUserRoles(String[] userId, String[] roleId, final String curUid) {
 
-        Map<String, Object> params = new HashedMap();
+        Map<String, Object> params = new HashMap<>();
         params.put("userIds", userId);
         params.put("roleIds", roleId);
         params.put("curUid", curUid);
@@ -149,9 +147,10 @@ public class AdminSerivce {
                 roleRes.setRoleId(rid);
                 roleRes.setResId(jo.getLong("resId"));
                 roleRes.setResType(jo.getString("resType"));
-                roleRes.setPermission("" + (false ? 1 : 0) + (false ? 1 : 0));
+                roleRes.setPermission("00");//FIXME
                 roleDao.saveRoleRes(roleRes);
-            }            
+
+            }
         }
         return "1";
     }
@@ -179,9 +178,9 @@ public class AdminSerivce {
     }
 
     public ServiceStatus changePwd(String userId, String curPwd, String newPwd, String cfmPwd) {
-        curPwd = Hashing.md5().newHasher().putString(curPwd, Charsets.UTF_8).hash().toString();
-        newPwd = Hashing.md5().newHasher().putString(newPwd, Charsets.UTF_8).hash().toString();
-        cfmPwd = Hashing.md5().newHasher().putString(cfmPwd, Charsets.UTF_8).hash().toString();
+        curPwd = DigestUtils.md5Hex(curPwd);
+        newPwd = DigestUtils.md5Hex(newPwd);
+        cfmPwd = DigestUtils.md5Hex(cfmPwd);
         if (newPwd.equals(cfmPwd)) {
             if (userDao.updateUserPassword(userId, curPwd, newPwd) == 1) {
                 return new ServiceStatus(ServiceStatus.Status.Success, "success");
@@ -201,12 +200,12 @@ public class AdminSerivce {
             ).map(
                     e -> e.getResId()
             ).distinct().collect(Collectors.toList());
-            List<DashboardBoard> result= boardDao.getBoardList(userId).stream()
-                    .filter( e -> resIdList.contains(e.getId())
+            List<DashboardBoard> result = boardDao.getBoardList(userId).stream()
+                    .filter(e -> resIdList.contains(e.getId())
                             || e.getUserId().equals(userId))
                     .collect(Collectors.toList());
-            LOG.info("getBoardList={}",result);
-            return  result;
+            LOG.info("getBoardList={}", result);
+            return result;
 
         }
     }

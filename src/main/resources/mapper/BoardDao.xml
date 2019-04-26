@@ -68,31 +68,19 @@
 
     <insert id="save" useGeneratedKeys="true" keyProperty="id" keyColumn="board_id" parameterType="org.cboard.pojo.DashboardBoard">
         INSERT INTO dashboard_board(user_id,board_name,layout_json,category_id)
-        VALUES (#{userId},#{name},#{layout},
-        <choose>
-            <when test="categoryId == null">
-                null
-            </when>
-            <otherwise>
-                #{categoryId}
-            </otherwise>
-        </choose>
-        )
+        VALUES (#{userId},#{name},#{layout},#{categoryId})
     </insert>
 
     <update id="update" parameterType="org.cboard.pojo.DashboardBoard">
         UPDATE dashboard_board
-        SET board_name = #{name},layout_json = #{layout},update_time = #{updateTime},
-        <choose>
-            <when test="categoryId == null">
-                category_id = null
-            </when>
-            <otherwise>
-                category_id = #{categoryId}
-            </otherwise>
-        </choose>
+        SET
+            board_name = #{name},
+            layout_json = #{layout},
+            update_time = #{updateTime},
+            category_id = #{categoryId}
         WHERE board_id = #{id}
     </update>
+
 
     <select id="countExistBoardName" parameterType="Map" resultType="java.lang.Long">
         SELECT count(1) FROM dashboard_board WHERE user_id = #{user_id}
@@ -127,6 +115,7 @@
         FROM dashboard_board_param where board_id = #{0} and user_id = #{1}
     </select>
 
+
     <insert id="saveBoardParam" parameterType="org.cboard.pojo.DashboardBoardParam">
         <![CDATA[
         INSERT INTO dashboard_board_param(user_id,board_id,config) VALUES (#{userId},#{boardId},#{config})
@@ -136,5 +125,7 @@
     <delete id="deleteBoardParam">
         DELETE FROM dashboard_board_param WHERE board_id = #{0} and user_id = #{1}
     </delete>
+
+
 
 </mapper>

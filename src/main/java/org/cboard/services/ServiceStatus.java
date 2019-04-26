@@ -36,7 +36,7 @@ public class ServiceStatus {
         }
 
         public String toString() {
-            return  new Integer(this.status).toString();
+            return   String.valueOf(this.status);
         }
     }
 

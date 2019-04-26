@@ -5,6 +5,7 @@ import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -140,7 +141,8 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         String password = dataSource.get(PASSWORD);
         Connection conn = null;
 // if ("true".equals(usePool)) {//都用jdbc连接池
-        String key = Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString(), Charsets.UTF_8).hash().toString();
+        String key = DigestUtils.md5Hex(JSONObject.toJSON(dataSource).toString());
+        
         DataSource ds = datasourceMap.get(key);
         if (ds == null) {
             synchronized (key.intern()) {

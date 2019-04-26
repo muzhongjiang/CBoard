@@ -12,6 +12,7 @@ import java.util.Map;
  */
 @Repository
 public interface UserDao {
+
     int save(DashboardUser user);
 
     int deleteUserById(String userId);

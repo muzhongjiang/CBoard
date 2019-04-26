@@ -16,21 +16,23 @@
         <property name="username" value="${jdbc_username}"/>
         <property name="password" value="${jdbc_password}"/>
 
-        <property name="initialSize" value="0"/>
+        <property name="initialSize" value="1"/>
         <property name="maxActive" value="20"/>
         <property name="minIdle" value="0"/>
         <property name="maxWait" value="60000"/>
 
         <property name="validationQuery" value="${validationQuery}"/>
-        <property name="testOnBorrow" value="false"/>
+        <property name="testOnBorrow" value="true"/>
         <property name="testOnReturn" value="false"/>
         <property name="testWhileIdle" value="true"/>
         <property name="timeBetweenEvictionRunsMillis" value="60000"/>
         <property name="minEvictableIdleTimeMillis" value="25200000"/>
-        <property name="removeAbandoned" value="true"/>
-        <property name="removeAbandonedTimeout" value="1800"/>
-        <property name="logAbandoned" value="true"/>
         <property name="filters" value="mergeStat,log4j"/>
+
+        <!--功能已弃用：-->
+        <!--<property name="removeAbandoned" value="true"/>-->
+        <!--<property name="removeAbandonedTimeout" value="1800"/>-->
+        <!--<property name="logAbandoned" value="true"/>-->
     </bean>
 
 </beans>

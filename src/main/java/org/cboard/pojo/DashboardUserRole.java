@@ -1,8 +1,15 @@
 package org.cboard.pojo;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * Created by yfyuan on 2016/12/6.
  */
+@Getter
+@Setter
+@ToString
 public class DashboardUserRole {
     private Long userRoleId;
     private String userId;
@@ -12,23 +19,5 @@ public class DashboardUserRole {
         return userRoleId;
     }
 
-    public void setUserRoleId(Long userRoleId) {
-        this.userRoleId = userRoleId;
-    }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
-    }
 }

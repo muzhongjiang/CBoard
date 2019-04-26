@@ -27,9 +27,7 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="druid-stat-interceptor"
-          class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
-    </bean>
+
 
     <bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut" scope="prototype">
         <property name="patterns">
@@ -37,6 +35,10 @@
                 <value>org.cboard.dao.*</value>
             </list>
         </property>
+    </bean>
+
+    <bean id="druid-stat-interceptor"
+          class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
     </bean>
 
     <aop:config>

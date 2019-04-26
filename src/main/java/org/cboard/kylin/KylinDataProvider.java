@@ -3,6 +3,7 @@ package org.cboard.kylin;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.cboard.cache.CacheManager;
 import org.cboard.dataprovider.DataProvider;
 import org.cboard.dataprovider.Initializing;
@@ -66,7 +67,7 @@ public class KylinDataProvider extends DataProvider implements Aggregatable, Ini
     private SqlHelper sqlHelper;
 
     private String getKey(Map<String, String> dataSource, Map<String, String> query) {
-        return Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString() + JSONObject.toJSON(query).toString(), Charsets.UTF_8).hash().toString();
+        return DigestUtils.md5Hex(JSONObject.toJSONString(dataSource)  + JSONObject.toJSONString(query) );
     }
 
 

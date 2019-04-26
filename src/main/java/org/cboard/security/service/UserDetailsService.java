@@ -13,15 +13,14 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("deprecation")
+
 public final class UserDetailsService extends AbstractCasAssertionUserDetailsService {
 
     private static final String NON_EXISTENT_PASSWORD_VALUE = "NO_PASSWORD";
 
-    @SuppressWarnings("unused")
+
     private final String[] attributes;
 
-    @SuppressWarnings("unused")
     private boolean convertToUpperCase = true;
 
     @Autowired

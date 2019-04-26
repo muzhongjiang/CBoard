@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.keyvalue.DefaultMapEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
@@ -560,7 +561,7 @@ public class ElasticsearchDataProvider extends DataProvider implements Aggregata
     }
 
     private String getKey() {
-        return Hashing.md5().newHasher().putString(JSONObject.toJSON(dataSource).toString() + JSONObject.toJSON(query).toString(), Charsets.UTF_8).hash().toString();
+        return DigestUtils.md5Hex(JSONObject.toJSONString(dataSource)+ JSONObject.toJSONString(query));
     }
 
     private void getField(Map<String, String> types, Entry<String, Object> field, String parent) {

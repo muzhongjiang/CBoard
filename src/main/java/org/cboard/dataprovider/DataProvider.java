@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.googlecode.aviator.AviatorEvaluator;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.cboard.cache.CacheManager;
 import org.cboard.dataprovider.aggregator.Aggregatable;
 import org.cboard.dataprovider.config.AggConfig;
@@ -45,11 +46,11 @@ public abstract class DataProvider {
     @Autowired
     private RoleService roleService;
 
-    protected Map<String, String> dataSource;
+    protected Map<String, String> dataSource;//Dashboard的数据源，不是DB的DataSource
     protected Map<String, String> query;
 
     private boolean isUsedForTest = false;
-    private long interval = 12 * 60 * 60; // second
+    private long interval = 12 * 60 * 60; // 数据集的刷新时间（second）FIXME 未使用?????
 
     public static final String NULL_STRING = "#NULL";
 
@@ -79,11 +80,9 @@ public abstract class DataProvider {
      * @return
      */
     public final String[] getDimVals(String columnName, AggConfig config, boolean reload) throws Exception {
-        String[] dimVals = null;
         evalValueExpression(config);
-        dimVals = ((Aggregatable) this).queryDimVals(columnName, config);
-
-        return Arrays.stream(dimVals)
+        String[] dimValArr  = ((Aggregatable) this).queryDimVals(columnName, config);
+        return Arrays.stream(dimValArr)
                 .map(member -> {
                     return Objects.isNull(member) ? NULL_STRING : member;
                 })
@@ -138,34 +137,13 @@ public abstract class DataProvider {
         return list.stream();
     }
 
-    public String getLockKey() {
+    protected String getLockKey() {
         String dataSourceStr = JSONObject.toJSON(dataSource).toString();
         String queryStr = JSONObject.toJSON(query).toString();
-        return Hashing.md5().newHasher().putString(dataSourceStr + queryStr, Charsets.UTF_8).hash().toString();
+        return DigestUtils.md5Hex(dataSourceStr + queryStr);
     }
 
-    //FIXME
-    public List<DimensionConfig> filterCCList2DCList(List<ConfigComponent> filters) {
-        List<DimensionConfig> result = new LinkedList<>();
-        filters.stream().forEach(cc -> {
-            result.addAll(configComp2DimConfigList(cc));
-        });
-        return result;
-    }
 
-    public List<DimensionConfig> configComp2DimConfigList(ConfigComponent cc) {
-        List<DimensionConfig> result = new LinkedList<>();
-        if (cc instanceof DimensionConfig) {
-            result.add((DimensionConfig) cc);
-        } else {
-            Iterator<ConfigComponent> iterator = cc.getIterator();
-            while (iterator.hasNext()) {
-                ConfigComponent next = iterator.next();
-                result.addAll(configComp2DimConfigList(next));
-            }
-        }
-        return result;
-    }
 
 
     /**
