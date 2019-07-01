@@ -1,8 +1,6 @@
 package org.cboard.dataprovider;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 import com.googlecode.aviator.AviatorEvaluator;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cboard.cache.CacheManager;
@@ -81,7 +79,7 @@ public abstract class DataProvider {
      */
     public final String[] getDimVals(String columnName, AggConfig config, boolean reload) throws Exception {
         evalValueExpression(config);
-        String[] dimValArr  = ((Aggregatable) this).queryDimVals(columnName, config);
+        String[] dimValArr = ((Aggregatable) this).queryDimVals(columnName, config);
         return Arrays.stream(dimValArr)
                 .map(member -> {
                     return Objects.isNull(member) ? NULL_STRING : member;
@@ -142,8 +140,6 @@ public abstract class DataProvider {
         String queryStr = JSONObject.toJSON(query).toString();
         return DigestUtils.md5Hex(dataSourceStr + queryStr);
     }
-
-
 
 
     /**

@@ -17,6 +17,9 @@ import static org.cboard.dataprovider.DataProvider.NULL_STRING;
  */
 public class DPCommonUtils {
 
+    /**
+     * 返回数据前 将查询的结果数据转为 AggregateResult格式
+     */
     public static AggregateResult transform2AggResult(AggConfig config, List<String[]> list) throws Exception {
         // recreate a dimension stream
         Stream<DimensionConfig> dimStream = Stream.concat(config.getColumns().stream(), config.getRows().stream());

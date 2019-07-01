@@ -302,7 +302,7 @@ cBoard.controller('dashboardViewCtrl', function ($timeout, $rootScope, $scope, $
         $scope.datasetFilters = [];
         $scope.relationFilters = [];
 
-        //将点击的参数赋值到看板上的参数中
+        //将点击的参数赋值到报表上的参数中
         //"{"targetId":3,"params":[{"targetField":"logo","value":"iphone"},{"targetField":"logo1","value":"上海市"}]}" targetField==param.name
         if (location.href.split("?")[1]) {
             var urlParam = JSON.parse(decodeURI(location.href.split("?")[1]));
@@ -448,7 +448,7 @@ cBoard.controller('dashboardViewCtrl', function ($timeout, $rootScope, $scope, $
     $scope.config = function (widget) {
         $state.go('config.widget', {id: widget.widget.id});
     };
-    
+
     $scope.skip = function (widget) {
          $state.go('dashboard.category.view', {id: widget.extenal.targetId});
     };

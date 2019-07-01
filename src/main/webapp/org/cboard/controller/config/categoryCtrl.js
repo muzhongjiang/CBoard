@@ -31,7 +31,7 @@ cBoard.controller('categoryCtrl', function ($scope, $http, ModalUtils, $filter) 
         $scope.curCategory = angular.copy(ds);
     };
     $scope.deleteBordCategory = function (ds) {
-        //FIXME  删除前如果当前看板"分类"下有"看板"存在应该提示！！！
+        //FIXME  删除前如果当前报表"分类"下有"报表"存在应该提示！！！
         ModalUtils.confirm(translate("COMMON.CONFIRM_DELETE"), "modal-warning", "lg", function () {
             $http.post("dashboard/deleteCategory.do", {id: ds.id}).success(function () {
                 $scope.optFlag = 'none';

@@ -295,7 +295,7 @@ CBoardEChartRender.prototype.addClick = function (chartConfig, relations, $state
             }
         });
 
-        //触发弹出看板
+        //触发弹出报表
         _.each(_.filter(links,function(e){return e.type=="board"}), function(relation){
             var url = $state.href('mine.view', {id: relation.targetId});
             var param = JSON.stringify(_.find(relations_new, function(e){return e.targetId == relation.targetId}));

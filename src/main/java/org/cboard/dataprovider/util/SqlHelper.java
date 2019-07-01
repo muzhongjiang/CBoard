@@ -2,11 +2,10 @@ package org.cboard.dataprovider.util;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cboard.dataprovider.config.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -21,20 +20,64 @@ import static org.cboard.dataprovider.DataProvider.separateNull;
 /**
  * Created by zyong on 2017/9/15.
  */
+@Slf4j
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SqlHelper {
-    private static final Logger LOG = LoggerFactory.getLogger(SqlHelper.class);
 
     private String tableName;
     private boolean isSubquery;
     private SqlSyntaxHelper sqlSyntaxHelper = new SqlSyntaxHelper();
 
-    public SqlHelper() {
-    }
 
     public SqlHelper(String tableName, boolean isSubquery) {
         this.tableName = tableName;
         this.isSubquery = isSubquery;
     }
+
+
+
+
+    /**
+     * 添加limit限制
+     */
+    public static String limitSql(String driver, String sql, int resultLimit) {
+
+        //mysql语法:
+        if (driver.contains("mysql")
+                || driver.contains("postgresql")
+                || driver.contains("Hive")
+                || driver.contains("Presto")
+                || driver.contains("ClickHouse")
+                || driver.contains("impala")
+                || driver.contains("kylin")
+        ) {
+            String formatSql = "\n SELECT * FROM (\n %s \n) t1 LIMIT %d ";
+            return String.format(formatSql, sql, resultLimit);
+        }
+
+        //Oracle:
+        if (driver.contains("Oracle")) {
+            String formatSql = "\n SELECT * FROM (\n %s \n) t1 ROWNUM <= %d ";  //FIXME 换行符要根据系统确定
+            return String.format(formatSql, sql, resultLimit);
+        }
+
+        //SQLServer:
+        if (driver.contains("SQLServer")) {
+            String formatSql = "\n SELECT TOP %d  * FROM (\n %s \n) t1 ";
+            return String.format(formatSql, resultLimit, sql);
+        }
+
+        //没找到对应的driver：
+        log.error("未加resultLimit");
+        return sql;
+    }
+
+
+
+
+
 
     public String assembleFilterSql(AggConfig config) {
         String whereStr = null;
@@ -88,6 +131,11 @@ public class SqlHelper {
         return exec;
     }
 
+
+    //================private:==============
+
+
+
     private String filterSql(Stream<ConfigComponent> filterStream, String prefix) {
         StringJoiner where = new StringJoiner("\nAND ", prefix + " ", "");
         where.setEmptyValue("");
@@ -96,14 +144,6 @@ public class SqlHelper {
                 .filter(e -> e != null)
                 .forEach(where::add);
 
-
-        //============
-//        Object[] arr=filterStream.toArray();
-//        for (int i = 0; i < arr.length; i++) {
-//            ConfigComponent cc=(ConfigComponent)arr[i];
-//            System.err.println(cc);
-//
-//        }
 
         return where.toString();
     }
@@ -222,50 +262,7 @@ public class SqlHelper {
         return columns.toString();
     }
 
-    public SqlHelper setSqlSyntaxHelper(SqlSyntaxHelper sqlSyntaxHelper) {
-        this.sqlSyntaxHelper = sqlSyntaxHelper;
-        return this;
-    }
 
-    public SqlSyntaxHelper getSqlSyntaxHelper() {
-        return this.sqlSyntaxHelper;
-    }
-
-
-    /**
-     * 添加limit限制
-     */
-    public static String limitSql(String driver, String sql, int resultLimit) {
-
-        //mysql语法:
-        if (driver.contains("mysql")
-                || driver.contains("postgresql")
-                || driver.contains("Hive")
-                || driver.contains("Presto")
-                || driver.contains("ClickHouse")
-                || driver.contains("impala")
-                || driver.contains("kylin")
-        ) {
-            String formatSql = "\n SELECT * FROM (\n %s \n) t1 LIMIT %d ";
-            return String.format(formatSql, sql, resultLimit);
-        }
-
-        //Oracle:
-        if (driver.contains("Oracle")) {
-            String formatSql = "\n SELECT * FROM (\n %s \n) t1 ROWNUM <= %d ";  //FIXME 换行符要根据系统确定
-            return String.format(formatSql, sql, resultLimit);
-        }
-
-        //SQLServer:
-        if (driver.contains("SQLServer")) {
-            String formatSql = "\n SELECT TOP %d  * FROM (\n %s \n) t1 ";
-            return String.format(formatSql, resultLimit, sql);
-        }
-
-        //没找到对应的driver：
-        LOG.error("未加resultLimit");
-        return sql;
-    }
 
 
 }

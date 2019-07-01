@@ -131,7 +131,7 @@ CREATE TABLE dashboard_board_param (
   board_param_id bigint(20) NOT NULL AUTO_INCREMENT,
   user_id varchar(50) NOT NULL,
   board_id bigint(20) NOT NULL,
-  config text,
+  config text, # dm层sql应该比较简单
   PRIMARY KEY (board_param_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

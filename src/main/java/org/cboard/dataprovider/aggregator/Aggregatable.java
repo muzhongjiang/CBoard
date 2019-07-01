@@ -31,7 +31,6 @@ public interface Aggregatable {
      */
     AggregateResult queryAggData(AggConfig ac) throws Exception;
 
-
     /**
      * '预览查询'即：显示最终的sql
      */

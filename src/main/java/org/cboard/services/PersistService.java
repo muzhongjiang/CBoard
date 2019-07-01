@@ -57,7 +57,7 @@ public class PersistService {
                     .toString();
             scriptPath = URLDecoder.decode(scriptPath, "UTF-8"); // decode whitespace
             String cmd = String.format("%s %s %s", phantomjsPath, scriptPath, phantomUrl);
-            LOG.info("Run phantomjs command: {}", cmd);
+            LOG.info("phantomjs下载Dashbaord >>>>>>> Run phantomjs command: {}", cmd);
             process = Runtime.getRuntime().exec(cmd);
             final Process p = process;
             new Thread(() -> {
