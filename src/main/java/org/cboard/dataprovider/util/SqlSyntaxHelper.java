@@ -9,10 +9,13 @@ import java.util.Map;
 /**
  * Created by zyong on 2017/9/18.
  */
-public class SqlSyntaxHelper {
+public  class SqlSyntaxHelper {
 
     private Map<String, Integer> columnTypes;
 
+    /**
+     * 子类有不同实现
+     */
     public String getProjectStr(DimensionConfig config) {
         return config.getColumnName();
     }

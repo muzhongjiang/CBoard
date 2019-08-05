@@ -102,7 +102,7 @@ public class DataProviderService {
             Dataset dataset = getDataset(datasetId);
             attachCustom(dataset, config);
             DataProvider dataProvider = getDataProvider(datasourceId, query, dataset);
-            String[] result = dataProvider.getDimVals(columnName, config, reload);
+            String[] result = dataProvider.getDimensionValues(columnName, config, reload);
             return result;
         } catch (Exception e) {
             LOG.error("", e);

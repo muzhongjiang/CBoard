@@ -297,6 +297,12 @@ public class DashboardController extends BaseController {
                                        @RequestParam(name = "colmunName", required = true) String colmunName,
                                        @RequestParam(name = "cfg", required = false) String cfg,
                                        @RequestParam(name = "reload", required = false, defaultValue = "false") Boolean reload) {
+
+       //TODO ????
+
+
+
+
         Map<String, String> strParams = null;
         if (query != null) {
             JSONObject queryO = JSONObject.parseObject(query);
@@ -331,7 +337,7 @@ public class DashboardController extends BaseController {
     }
 
     /**
-     * "预览" 或 查询
+     *  从数据源Query数据的统一入口（"预览" 或 查询）
      */
     @RequestMapping(value = "/getAggregateData")
     public AggregateResult getAggregateData(@RequestParam(name = "datasourceId", required = false) Long datasourceId,

@@ -23,11 +23,10 @@ import static org.cboard.dataprovider.DataProvider.separateNull;
 @Slf4j
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
 public class SqlHelper {
 
     private String tableName;
-    private boolean isSubquery;
+    private boolean isSubquery;//kylin不是子查询：isSubquery=false
     private SqlSyntaxHelper sqlSyntaxHelper = new SqlSyntaxHelper();
 
 
@@ -35,8 +34,6 @@ public class SqlHelper {
         this.tableName = tableName;
         this.isSubquery = isSubquery;
     }
-
-
 
 
     /**
@@ -53,19 +50,19 @@ public class SqlHelper {
                 || driver.contains("impala")
                 || driver.contains("kylin")
         ) {
-            String formatSql = "\n SELECT * FROM (\n %s \n) t1 LIMIT %d ";
+            String formatSql = " SELECT * FROM ( %s  ) t1 LIMIT %d ";
             return String.format(formatSql, sql, resultLimit);
         }
 
         //Oracle:
         if (driver.contains("Oracle")) {
-            String formatSql = "\n SELECT * FROM (\n %s \n) t1 ROWNUM <= %d ";  //FIXME 换行符要根据系统确定
+            String formatSql = " SELECT * FROM ( %s  ) t1 ROWNUM <= %d ";  //FIXME 换行符要根据系统确定
             return String.format(formatSql, sql, resultLimit);
         }
 
         //SQLServer:
         if (driver.contains("SQLServer")) {
-            String formatSql = "\n SELECT TOP %d  * FROM (\n %s \n) t1 ";
+            String formatSql = " SELECT TOP %d  * FROM ( %s  ) t1 ";
             return String.format(formatSql, resultLimit, sql);
         }
 
@@ -73,10 +70,6 @@ public class SqlHelper {
         log.error("未加resultLimit");
         return sql;
     }
-
-
-
-
 
 
     public String assembleFilterSql(AggConfig config) {
@@ -123,9 +116,9 @@ public class SqlHelper {
         }
         String fsql = null;
         if (isSubquery) {
-            fsql = "\nSELECT %s \n FROM (\n%s\n) cb_view \n %s \n %s";
+            fsql = " SELECT %s  FROM ( %s ) cb_view  %s  %s";
         } else {
-            fsql = "\nSELECT %s \n FROM %s \n %s \n %s";
+            fsql = " SELECT %s  FROM %s  %s  %s";
         }
         String exec = String.format(fsql, selectColsStr, tableName, whereStr, groupByStr);
         return exec;
@@ -135,9 +128,8 @@ public class SqlHelper {
     //================private:==============
 
 
-
     private String filterSql(Stream<ConfigComponent> filterStream, String prefix) {
-        StringJoiner where = new StringJoiner("\nAND ", prefix + " ", "");
+        StringJoiner where = new StringJoiner(" AND ", prefix + " ", "");
         where.setEmptyValue("");
         filterStream.map(e -> separateNull(e))
                 .map(e -> configComponentToSql(e))
@@ -163,6 +155,7 @@ public class SqlHelper {
     }
 
     /**
+     * 参数 过滤
      * Parser a single filter configuration to sql syntax
      */
     private Function<DimensionConfig, String> filter2SqlCondtion = (config) -> {
@@ -247,7 +240,9 @@ public class SqlHelper {
         return rangeQuery(fieldName, from, to, false, false);
     }
 
-
+    /**
+     * 拼接 聚合 列
+     */
     private String assembleAggValColumns(Stream<ValueConfig> selectStream) {
         StringJoiner columns = new StringJoiner(", ", "", " ");
         columns.setEmptyValue("");
@@ -255,14 +250,15 @@ public class SqlHelper {
         return columns.toString();
     }
 
+    /**
+     * 拼接 维度列
+     */
     private String assembleDimColumns(Stream<DimensionConfig> columnsStream) {
         StringJoiner columns = new StringJoiner(", ", "", " ");
         columns.setEmptyValue("");
         columnsStream.map(g -> sqlSyntaxHelper.getProjectStr(g)).distinct().filter(e -> e != null).forEach(columns::add);
         return columns.toString();
     }
-
-
 
 
 }

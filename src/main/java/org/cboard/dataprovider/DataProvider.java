@@ -77,7 +77,7 @@ public abstract class DataProvider {
      * @param columnName
      * @return
      */
-    public final String[] getDimVals(String columnName, AggConfig config, boolean reload) throws Exception {
+    public final String[] getDimensionValues(String columnName, AggConfig config, boolean reload) throws Exception {
         evalValueExpression(config);
         String[] dimValArr = ((Aggregatable) this).queryDimVals(columnName, config);
         return Arrays.stream(dimValArr)

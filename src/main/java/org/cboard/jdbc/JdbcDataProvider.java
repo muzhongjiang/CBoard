@@ -2,6 +2,7 @@ package org.cboard.jdbc;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidDataSourceFactory;
+import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.map.HashedMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.alibaba.druid.util.JdbcConstants.*;
 
 /**
  * Created by yfyuan on 2016/8/17.
@@ -39,27 +41,30 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
     @DatasourceParameter(label = "{{'DATAPROVIDER.JDBC.DRIVER'|translate}} *",
             type = DatasourceParameter.Type.Select,
             optionsText = {
-                    "com.mysql.jdbc.Driver",
-                    "org.postgresql.Driver",
+                    MYSQL_DRIVER,
+                    POSTGRESQL_DRIVER,
                     "com.pivotal.jdbc.GreenplumDriver",
-                    "oracle.jdbc.driver.OracleDriver",
-                    "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-                    "com.facebook.presto.jdbc.PrestoDriver",
-                    "org.apache.hive.jdbc.HiveDriver", //hiveserver2
-                    "com.cloudera.impala.jdbc41.Driver"
+                    ORACLE_DRIVER,
+                    SQL_SERVER_DRIVER,
+                    PRESTO_DRIVER,
+                    HIVE_DRIVER, //hiveserver2
+                    "com.cloudera.impala.jdbc41.Driver",
+                    CLICKHOUSE_DRIVER
             },
             optionsValue = {
-                    "Mysql",
-                    "Postgresql",
+                    MYSQL,
+                    POSTGRESQL,
                     "Greenplum",
-                    "Oracle",
-                    "SQLServer",
-                    "Presto",
-                    "Hive", //hiveserver2
-                    "Impala"
+                    ORACLE,
+                    SQL_SERVER,
+                    PRESTO,
+                    HIVE, //hiveserver2
+                    "Impala",
+                    CLICKHOUSE
             },
             required = true,
             order = 1)
+
     private String DRIVER = "driver";
 
 
@@ -182,7 +187,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         if (config != null) {
             whereStr = sqlHelper.assembleFilterSql(config);
         }
-        fsql = "SELECT cb_view.%s FROM (\n%s\n) cb_view %s GROUP BY cb_view.%s";
+        fsql = "SELECT cb_view.%s FROM ( %s ) cb_view %s GROUP BY cb_view.%s";
         exec = String.format(fsql, columnName, sql, whereStr, columnName);
         LOG.info("【{}】", exec);
         try (Connection connection = getConnection();
@@ -202,7 +207,7 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
         ResultSetMetaData metaData;
         try {
             //stat.setMaxRows(100);
-            String fsql = "\nSELECT * FROM (\n%s\n) cb_view WHERE 1=0";//WHERE 1=0 不需要返回数据，只需要元数据
+            String fsql = "  SELECT * FROM ( %s ) cb_view WHERE 1=0";//WHERE 1=0 不需要返回数据，只需要元数据
             String sql = String.format(fsql, subQuerySql);
             LOG.info("getMetaData  sql=【{}】", sql);
             ResultSet rs = stat.executeQuery(sql);
@@ -233,7 +238,10 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
                 int columnCount = metaData.getColumnCount();
                 result = new HashedMap<>();
                 for (int i = 0; i < columnCount; i++) {
-                    result.put(metaData.getColumnLabel(i + 1).toUpperCase(), metaData.getColumnType(i + 1));
+                    result.put(
+                            metaData.getColumnLabel(i + 1).toUpperCase(),//方便后面忽略列名大小写
+                            metaData.getColumnType(i + 1)
+                    );
                 }
                 cache.put(key, result, cacheExpire);
                 return result;
@@ -297,7 +305,8 @@ public class JdbcDataProvider extends DataProvider implements Aggregatable, Init
 
     @Override
     public String viewAggDataQuery(AggConfig config) throws Exception {
-        return SqlHelper.limitSql(dataSource.get(DRIVER), sqlHelper.assembleAggDataSql(config), resultLimit);
+        String sql = SqlHelper.limitSql(dataSource.get(DRIVER), sqlHelper.assembleAggDataSql(config), resultLimit);
+        return SQLUtils.formatMySql(sql);
     }
 
 
